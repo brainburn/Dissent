@@ -58,5 +58,76 @@ namespace Anonymity {
     }
     return _data->Keys[idx];
   }
+
+  QByteArray Group::keysToByteArray() const
+  {
+      QByteArray bkey_data;
+      QByteArray t_data;
+      QDataStream stream(&bkey_data, QIODevice::WriteOnly);
+      QDataStream t_stream(&t_data, QIODevice::WriteOnly);
+
+      int v_size = this->_data->Keys.count();
+
+      if(v_size == 0){
+         stream << 0;
+       }else{
+          for(int i = 0;  i< v_size; i++){
+              t_stream << this->_data->Keys[i]->GetByteArray();
+              stream << t_data.count() << t_data;
+              t_data.clear();
+          }
+      }
+      return bkey_data;
+  }
+
+  //Serialize enough info to recreate Group, not GroupData...
+  QDataStream &operator<<(QDataStream &out, const Group group)
+  {
+      QByteArray bgroup_data;
+      QDataStream stream(&bgroup_data, QIODevice::ReadWrite);
+
+      out << group.GetIds();
+      out << group.keysToByteArray();
+
+      //out << bgroup_data;
+
+      return out;
+  }
+
+  //Use group to initialize class...
+  QDataStream &operator>>(QDataStream &in, Group &group)
+  {
+      QVector<Id> t_group_vector;
+      QVector<AsymmetricKey *> t_keyp_vector;
+
+
+      in >> t_group_vector;
+
+      /*
+      int g_size;
+      uint k_size;
+      char *t_bytes;
+      g_size = t_group_vector.count();
+
+
+      for(int i = 0; i < g_size; i++){
+          in >> k_size;
+          std::cout<<"ksize::" << k_size << std::endl;
+          if(k_size <= 4){
+              break;
+          }
+          t_bytes = new char[k_size];
+          in.readBytes(t_bytes, k_size);
+          Crypto::CppPublicKey *t_key = new Crypto::CppPublicKey(QByteArray(t_bytes));
+          t_keyp_vector.append(t_key);
+          delete [] t_bytes;
+      }
+      */
+
+      group = Group(t_group_vector);
+
+      return in;
+
+  }
 }
 }

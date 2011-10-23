@@ -37,22 +37,22 @@ HEADERS += ext/googletest/include/gtest/gtest-death-test.h \
            src/Tests/RoundTest.hpp
 
 SOURCES += ext/googletest/src/gtest-all.cc \
-           src/Tests/AddressTest.cpp \
+#           src/Tests/AddressTest.cpp \
            src/Tests/MainTest.cpp \
            src/Tests/Mock.cpp \
-           src/Tests/TimeTest.cpp \
-           src/Tests/RpcTest.cpp \
-           src/Tests/BufferEdgeTest.cpp \
-           src/Tests/IdTest.cpp \
-           src/Tests/ConnectionTest.cpp \
-           src/Tests/SettingsTest.cpp \
+#           src/Tests/TimeTest.cpp \
+#           src/Tests/RpcTest.cpp \
+#           src/Tests/BufferEdgeTest.cpp \
+#           src/Tests/IdTest.cpp \
+#           src/Tests/ConnectionTest.cpp \
+#           src/Tests/SettingsTest.cpp \
            src/Tests/GroupTest.cpp \
-           src/Tests/NullRoundTest.cpp \
+#           src/Tests/NullRoundTest.cpp \
            src/Tests/Crypto.cpp \
-           src/Tests/OnionTest.cpp \
-           src/Tests/RandomTest.cpp \
-           src/Tests/HashTest.cpp \
-           src/Tests/RoundTest.cpp \
+#           src/Tests/OnionTest.cpp \
+#           src/Tests/RandomTest.cpp \
+#           src/Tests/HashTest.cpp \
+#           src/Tests/RoundTest.cpp \
            src/Tests/TestNode.cpp \
-           src/Tests/LogTest.cpp \
-           src/Tests/ShuffleRoundTest.cpp
+          src/Tests/LogTest.cpp \
+#           src/Tests/ShuffleRoundTest.cpp

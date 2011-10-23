@@ -5,16 +5,27 @@ using namespace Dissent::Anonymity;
 
 namespace Dissent {
 namespace Tests {
+
   TEST(Group, Basic)
   {
     Id id[10];
+
+    QByteArray qb;
+    QDataStream strm(&qb, QIODevice::WriteOnly);
 
     QVector<Id> group_vector;
     for(int idx = 0; idx < 10; idx++) {
       group_vector.append(id[idx]);
     }
 
+    Group group2(group_vector);
+    strm << group2;
+
     Group group(group_vector);
+    std::cout << "ID_1  " << group.GetId(1).GetInteger() << std::endl;
+    QDataStream stream2(&qb, QIODevice::ReadOnly);
+     stream2 >> group;
+    std::cout << "ID_1  " << group.GetId(1).GetInteger() << std::endl;
 
     EXPECT_EQ(group.GetSize(), 10);
     for(int idx = 0; idx < 10; idx++) {
@@ -46,6 +57,7 @@ namespace Tests {
       EXPECT_EQ(group.GetId(idx), group.GetId(idx));
       EXPECT_EQ(group0.GetId(idx), group0.GetId(idx));
     }
+
   }
 }
 }

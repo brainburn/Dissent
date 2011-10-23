@@ -4,9 +4,9 @@
 #include <QHash>
 #include <QSharedData>
 #include <QVector>
-
+#include <iostream>
 #include "../Connections/Id.hpp"
-#include "../Crypto/AsymmetricKey.hpp"
+#include "../Crypto/CppPublicKey.hpp"
 
 namespace Dissent {
 namespace Anonymity {
@@ -43,7 +43,10 @@ namespace Anonymity {
       const QHash<const Id, int> IdtoInt;
       const QVector<AsymmetricKey *> Keys;
       const int Size;
+
   };
+
+
 
   /**
    * Members of an anonymity session.  Ids represent overlay addresses for peers
@@ -106,9 +109,17 @@ namespace Anonymity {
        */
       int GetSize() const { return _data->Size; }
 
+      /**
+       * Returns a binary representation of the AssymetricKeys of the group
+       */
+      QByteArray keysToByteArray() const;
+
     private:
       QSharedDataPointer<GroupData> _data;
   };
+
+  QDataStream &operator << (QDataStream &out, const Group group);
+  QDataStream &operator >> (QDataStream &in, Group &group);
 }
 }
 
