@@ -3,7 +3,7 @@
 
 #include <QByteArray>
 #include <QString>
-
+#include <iostream>
 namespace Dissent {
 namespace Crypto {
   /**

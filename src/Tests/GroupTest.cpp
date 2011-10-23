@@ -8,24 +8,35 @@ namespace Tests {
 
   TEST(Group, Basic)
   {
+    DisableLogging();
     Id id[10];
 
+   // AsymmetricKey *key0 = new CppPrivateKey();
+   // EXPECT_TRUE(key0->IsValid());
+   // AsymmetricKey *pu_key0 = key0->GetPublicKey();
+    //EXPECT_TRUE(pu_key0->IsValid());
+
     QByteArray qb;
-    QDataStream strm(&qb, QIODevice::WriteOnly);
+    QDataStream strm(&qb, QIODevice::ReadWrite);
 
     QVector<Id> group_vector;
+    QVector<AsymmetricKey *> key_vector;
     for(int idx = 0; idx < 10; idx++) {
+      AsymmetricKey *key0 = new CppPrivateKey();
       group_vector.append(id[idx]);
+      key_vector.append(key0->GetPublicKey());
     }
 
-    Group group2(group_vector);
+    Group group2(group_vector,key_vector);
     strm << group2;
 
     Group group(group_vector);
-    std::cout << "ID_1  " << group.GetId(1).GetInteger() << std::endl;
+
     QDataStream stream2(&qb, QIODevice::ReadOnly);
-     stream2 >> group;
-    std::cout << "ID_1  " << group.GetId(1).GetInteger() << std::endl;
+    stream2 >> group;
+    for(int idx = 0; idx < 10; idx++){
+        EXPECT_TRUE(group.GetKey(idx)->IsValid());
+    }
 
     EXPECT_EQ(group.GetSize(), 10);
     for(int idx = 0; idx < 10; idx++) {
@@ -57,7 +68,8 @@ namespace Tests {
       EXPECT_EQ(group.GetId(idx), group.GetId(idx));
       EXPECT_EQ(group0.GetId(idx), group0.GetId(idx));
     }
-
+    EnableLogging();
   }
+
 }
 }

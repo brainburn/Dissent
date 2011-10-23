@@ -6,7 +6,9 @@
 #include <QVector>
 #include <iostream>
 #include "../Connections/Id.hpp"
+#include "../Crypto/AsymmetricKey.hpp"
 #include "../Crypto/CppPublicKey.hpp"
+#include "../Crypto/CppPrivateKey.hpp"
 
 namespace Dissent {
 namespace Anonymity {

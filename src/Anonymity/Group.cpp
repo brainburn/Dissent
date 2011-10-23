@@ -62,34 +62,25 @@ namespace Anonymity {
   QByteArray Group::keysToByteArray() const
   {
       QByteArray bkey_data;
-      QByteArray t_data;
-      QDataStream stream(&bkey_data, QIODevice::WriteOnly);
-      QDataStream t_stream(&t_data, QIODevice::WriteOnly);
 
       int v_size = this->_data->Keys.count();
 
-      if(v_size == 0){
-         stream << 0;
-       }else{
+      if(v_size > 0){
           for(int i = 0;  i< v_size; i++){
-              t_stream << this->_data->Keys[i]->GetByteArray();
-              stream << t_data.count() << t_data;
-              t_data.clear();
+              bkey_data.append(this->_data->Keys[i]->GetByteArray());
           }
       }
       return bkey_data;
+
   }
 
   //Serialize enough info to recreate Group, not GroupData...
   QDataStream &operator<<(QDataStream &out, const Group group)
   {
-      QByteArray bgroup_data;
-      QDataStream stream(&bgroup_data, QIODevice::ReadWrite);
+      QByteArray bgroup_data = group.keysToByteArray();
 
       out << group.GetIds();
-      out << group.keysToByteArray();
-
-      //out << bgroup_data;
+      out.writeRawData(bgroup_data.data(), bgroup_data.size());
 
       return out;
   }
@@ -99,32 +90,31 @@ namespace Anonymity {
   {
       QVector<Id> t_group_vector;
       QVector<AsymmetricKey *> t_keyp_vector;
+      Crypto::CppPrivateKey *key_0 = new Crypto::CppPrivateKey();
+      Crypto::AsymmetricKey *key_1 = key_0->GetPublicKey();
+      int key_size = key_1->GetByteArray().count();
+      int group_size;
+      char *buf;
 
 
       in >> t_group_vector;
 
-      /*
-      int g_size;
-      uint k_size;
-      char *t_bytes;
-      g_size = t_group_vector.count();
+      group_size = t_group_vector.count();
 
+      buf = new char[key_size*group_size];
+      in.readRawData(buf, key_size*group_size);
 
-      for(int i = 0; i < g_size; i++){
-          in >> k_size;
-          std::cout<<"ksize::" << k_size << std::endl;
-          if(k_size <= 4){
-              break;
-          }
-          t_bytes = new char[k_size];
-          in.readBytes(t_bytes, k_size);
-          Crypto::CppPublicKey *t_key = new Crypto::CppPublicKey(QByteArray(t_bytes));
+      QByteArray bkey_container(buf,key_size*group_size);
+
+      for(int i = 0; i < group_size; i++){
+          Crypto::CppPublicKey *t_key = new Crypto::CppPublicKey(bkey_container);
           t_keyp_vector.append(t_key);
-          delete [] t_bytes;
+          bkey_container = bkey_container.remove(0, key_size);
       }
-      */
 
-      group = Group(t_group_vector);
+      delete [] buf;
+
+      group = Group(t_group_vector, t_keyp_vector);
 
       return in;
 

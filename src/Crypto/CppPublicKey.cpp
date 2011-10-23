@@ -53,7 +53,7 @@ namespace Crypto {
     try {
       _public_key->Load(queue);
     } catch (std::exception &e) {
-      qWarning() << "In CppPublicKey::Decrypt: " << e.what();
+      std::cout << "In CppPublicKey::Decrypt: " << e.what();
       return false;
     }
     return true;
