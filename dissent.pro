@@ -52,7 +52,9 @@ HEADERS += src/Dissent.hpp \
            src/Utils/Time.hpp \
            src/Utils/Timer.hpp \
            src/Utils/TimerCallback.hpp \
-           src/Utils/TimerEvent.hpp 
+           src/Utils/TimerEvent.hpp \  
+           src/Anonymity/VersionNode.hpp \
+    src/Anonymity/VersionGraph.hpp
 SOURCES += src/Init.cpp \
            src/Anonymity/Group.cpp \
            src/Anonymity/Log.cpp \
@@ -86,5 +88,6 @@ SOURCES += src/Init.cpp \
            src/Utils/Sleeper.cpp \
            src/Utils/Time.cpp \
            src/Utils/Timer.cpp \
-           src/Utils/TimerEvent.cpp
-
+           src/Utils/TimerEvent.cpp \
+           src/Anonymity/VersionNode.cpp \
+    src/Anonymity/VersionGraph.cpp

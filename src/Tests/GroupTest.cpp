@@ -30,10 +30,24 @@ namespace Tests {
     Group group2(group_vector,key_vector);
     strm << group2;
 
-    Group group(group_vector);
+   // Group group(group_vector);
 
-    QDataStream stream2(&qb, QIODevice::ReadOnly);
-    stream2 >> group;
+    VersionNode vn(0, QVector<uint>(0), QVector<uint>(0), qb);
+    qb.clear();
+
+    QByteArray z;
+    QDataStream strm1(&z, QIODevice::WriteOnly);
+    strm1 << vn;
+    QDataStream strm2(&z, QIODevice::ReadOnly);
+    //int q = -7;
+    strm2 >> vn;
+    //std::cout << "Q: " << q << std::endl;
+
+    Group const &group = vn.getGroup();
+    //QDataStream stream2(&qb, QIODevice::ReadOnly);
+   // stream2 >> group;
+
+    //Test keys
     for(int idx = 0; idx < 10; idx++){
         EXPECT_TRUE(group.GetKey(idx)->IsValid());
     }
