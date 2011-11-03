@@ -74,7 +74,7 @@ namespace Anonymity {
 
   }
 
-  //Serialize enough info to recreate Group, not GroupData...
+
   QDataStream &operator<<(QDataStream &out, const Group group)
   {
       QByteArray bgroup_data = group.keysToByteArray();
@@ -85,17 +85,19 @@ namespace Anonymity {
       return out;
   }
 
-  //Use group to initialize class...
+  //Memory leaks from key_0, key_1. Maybe more.
   QDataStream &operator>>(QDataStream &in, Group &group)
   {
       QVector<Id> t_group_vector;
       QVector<AsymmetricKey *> t_keyp_vector;
       Crypto::CppPrivateKey *key_0 = new Crypto::CppPrivateKey();
-      Crypto::AsymmetricKey *key_1 = key_0->GetPublicKey();
+      Crypto::AsymmetricKey *key_1 = key_0->GetPublicKey(); 
       int key_size = key_1->GetByteArray().count();
-      int group_size;
-      char *buf;
-
+      int group_size = 0;
+      char *buf = 0;
+       
+      delete  key_0;
+      delete  key_1;
 
       in >> t_group_vector;
 
