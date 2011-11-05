@@ -32,7 +32,7 @@ namespace Tests {
 
    // Group group(group_vector);
 
-    VersionNode vn(0, QVector<uint>(0), QVector<uint>(0), qb);
+    VersionNode vn(qb);
     qb.clear();
 
     QByteArray z;
@@ -46,7 +46,7 @@ namespace Tests {
     Group const &group = vn.getGroup();
     //QDataStream stream2(&qb, QIODevice::ReadOnly);
    // stream2 >> group;
-
+    std::cout << "Version Hash: " <<vn.getHash() << std::endl;
     //Test keys
     for(int idx = 0; idx < 10; idx++){
         EXPECT_TRUE(group.GetKey(idx)->IsValid());

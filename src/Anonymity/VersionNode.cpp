@@ -15,6 +15,14 @@ namespace Anonymity {
   {
   }
 
+  VersionNode::VersionNode(const QByteArray _b_group_data):
+      group_hash(qHash(_b_group_data)),
+      pkeys(QVector<uint>(0)),
+      ckeys(QVector<uint>(0)),
+      b_group_data (_b_group_data)
+  {
+  }
+
 VersionNode::VersionNode(const uint _group_hash,
                          const QVector<uint> _pkeys,
                          const QVector<uint> _ckeys,
@@ -49,6 +57,10 @@ const uint &VersionNode::getHash() const {
 
 const QByteArray &VersionNode::getGroupByteArray() const {
     return this->b_group_data;
+}
+
+int VersionNode::addChild(VersionNode &child){
+
 }
 
 QDataStream &operator << (QDataStream &out, const VersionNode node){

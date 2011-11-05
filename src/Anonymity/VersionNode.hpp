@@ -13,6 +13,8 @@ class VersionNode
 public:
     VersionNode();
 
+    VersionNode(QByteArray _b_group_data);
+
     VersionNode(const uint _group_hash, const QVector<uint> _pkeys,
                 const QVector<uint> _ckeys, const QByteArray _b_group_data);
 
@@ -45,6 +47,8 @@ public:
      *  Returns the binary representation of the group related to the current version
      */
     const QByteArray &getGroupByteArray() const;
+
+    int addChild(VersionNode &child);
 };
 
 QDataStream &operator << (QDataStream &out, const VersionNode node);
