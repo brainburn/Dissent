@@ -85,7 +85,7 @@ namespace Anonymity {
       return out;
   }
 
-  //Check for memory leaks
+  //Check for memory leaks. Group reference??
   QDataStream &operator>>(QDataStream &in, Group &group)
   {
       QVector<Id> t_group_vector;

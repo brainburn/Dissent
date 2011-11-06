@@ -4,24 +4,32 @@ namespace Dissent {
 namespace Anonymity {
 VersionGraph::VersionGraph()
 {
-    this->current_version = 0;
-    this->version_db = QHash<uint, VersionNode>();
+    _data = new VersionGraphData(0, QHash<uint, VersionNode>());
 }
 
-const uint &VersionGraph::getCurrentVersion() const{
-    return this->current_version;
+VersionGraph::VersionGraph(const uint &_current_version,
+             const QHash<uint, VersionNode> &_version_db){
+    _data = new VersionGraphData(_current_version, _version_db);
 }
 
-const QHash<uint, VersionNode> &VersionGraph::getCurrentVersionDb() const{
-    return this->version_db;
+const uint &VersionGraph::getCurrentVersion() const
+{
+    return _data->CurrentVersion;
 }
 
-QDataStream &operator << (QDataStream &out, const VersionGraph graph){
+const QHash<uint, VersionNode> &VersionGraph::getCurrentVersionDb() const
+{
+    return _data->VersionDB;
+}
+
+QDataStream &operator << (QDataStream &out, const VersionGraph graph)
+{
     out << graph.getCurrentVersion() << graph.getCurrentVersionDb();
     return out;
 }
 
-QDataStream &operator >> (QDataStream &in, VersionGraph &graph){
+QDataStream &operator >> (QDataStream &in, VersionGraph &graph)
+{
     uint _hash_key;
     QHash<uint, VersionNode> _vdb;
 
