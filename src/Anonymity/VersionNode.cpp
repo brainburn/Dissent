@@ -7,12 +7,18 @@ namespace Anonymity {
     using Dissent::Connections::Id;
     using Dissent::Crypto::AsymmetricKey;
   }
+  const VersionNode VersionNode::Zero = VersionNode();
+
   VersionNode::VersionNode()
   {
       _data = new VersionNodeData(0,
                                   QVector<uint>(0),
                                   QVector<uint>(0),
                                   QByteArray(0));
+  }
+
+  VersionNode::VersionNode(int x){
+    _data = 0;
   }
 
   VersionNode::VersionNode(const QByteArray _b_group_data)

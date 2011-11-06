@@ -16,13 +16,14 @@ public:
     }
 
     const uint CurrentVersion;
-    const QHash<uint, VersionNode> VersionDB;
+    QHash<uint, VersionNode> VersionDB;
 };
 
 class VersionGraph
 {
 public:
     VersionGraph();
+    VersionGraph(const VersionNode &_version);
     VersionGraph(const uint &_current_version,
                  const QHash<uint, VersionNode> &_version_db);
 
@@ -42,6 +43,11 @@ public:
     const uint &getCurrentVersion() const;
 
     /**
+     * Returns the binary represenation of the version graph
+     */
+    const QHash<uint, VersionNode> &getCurrentVersionDb() const;
+
+    /**
      * Change the current active version
      */
     int setCurrent(const VersionNode vn);
@@ -49,37 +55,19 @@ public:
     /**
      * Returns the version associated with the given hash key
      */
-    VersionNode &getVersion(uint hash_key);
+    VersionNode& getVersion(uint hash_key);
 
     /**
-     * Confirms the given version
+     * Confirms the given version ??
      */
     int confirm(VersionNode vn);
 
     /**
-     *
+     * Adds a new version as a child to the given parents
      */
     int addNew(QVector<VersionNode> parents, VersionNode &vn);
 
-    /**
-     *
-     */
-    QVector<VersionNode> getHeads(VersionNode &vn);
-
-    /**
-     *
-     */
-    QVector<VersionNode> getHeads();
-
-    /**
-     *
-     */
-    QByteArray getBytes();
-
-    /**
-     *
-     */
-    void createFromByteArray(QByteArray bvg);
+    static VersionNode Zero;
 
 private:
     QSharedDataPointer<VersionGraphData> _data;

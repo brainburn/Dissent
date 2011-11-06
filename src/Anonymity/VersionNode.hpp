@@ -32,6 +32,7 @@ class VersionNode
 public:
     VersionNode();
 
+    VersionNode(int x);
     VersionNode(QByteArray _b_group_data);
 
     VersionNode(const uint _group_hash, const QVector<uint> _pkeys,
@@ -76,6 +77,13 @@ public:
      */
     void addParent(VersionNode &parent);
 
+
+    /**
+     * Returns the heads of the subgraph starting from vn
+     */
+    QVector<VersionNode> getHeads(VersionNode &vn);
+
+    static const VersionNode Zero;
 private:
     QSharedDataPointer<VersionNodeData> _data;
 };

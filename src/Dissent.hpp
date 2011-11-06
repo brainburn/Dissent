@@ -3,6 +3,7 @@
 
 #include "Anonymity/Group.hpp"
 #include "Anonymity/VersionNode.hpp"
+#include "Anonymity/VersionGraph.hpp"
 #include "Anonymity/Log.hpp"
 #include "Anonymity/NullRound.hpp"
 #include "Anonymity/Round.hpp"

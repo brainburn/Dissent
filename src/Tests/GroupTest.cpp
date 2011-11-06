@@ -42,8 +42,16 @@ namespace Tests {
     //int q = -7;
     strm2 >> vn;
     //std::cout << "Q: " << q << std::endl;
+    VersionGraph vg = VersionGraph(vn);
+    std::cout << "HASH: " << vg.getCurrentVersion() << std::endl;
 
-    Group const &group = vn.getGroup();
+    QByteArray w;
+    QDataStream strm3(&w, QIODevice::WriteOnly);
+    strm3 << vg;
+    QDataStream strm4(&w, QIODevice::ReadOnly);
+    strm4 >> vg;
+
+    Group const &group = vg.getVersion(vg.getCurrentVersion()).getGroup();
     //QDataStream stream2(&qb, QIODevice::ReadOnly);
    // stream2 >> group;
     std::cout << "Version Hash: " <<vn.getHash() << std::endl;
