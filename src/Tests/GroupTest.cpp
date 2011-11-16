@@ -42,7 +42,11 @@ namespace Tests {
     //int q = -7;
     strm2 >> vn;
     //std::cout << "Q: " << q << std::endl;
-    VersionGraph vg = VersionGraph(vn);
+    VersionGraph vg2 = VersionGraph(vn);
+
+    vg2.save("GraphFile");
+
+    VersionGraph vg = VersionGraph("GraphFile");
     std::cout << "HASH: " << vg.getCurrentVersion() << std::endl;
 
     QByteArray w;
@@ -50,11 +54,15 @@ namespace Tests {
     strm3 << vg;
     QDataStream strm4(&w, QIODevice::ReadOnly);
     strm4 >> vg;
+    VersionNode vn2 = vg.getVersion(vg.getCurrentVersion());
+    vn2.setHash(1337);
+
 
     Group const &group = vg.getVersion(vg.getCurrentVersion()).getGroup();
-    //QDataStream stream2(&qb, QIODevice::ReadOnly);
-   // stream2 >> group;
-    std::cout << "Version Hash: " <<vn.getHash() << std::endl;
+
+    std::cout << "Version Hash 2: " <<vn2.getHash() << std::endl;
+    std::cout << "Version Hash: " <<vg.getVersion(vg.getCurrentVersion()).getHash() << std::endl;
+
     //Test keys
     for(int idx = 0; idx < 10; idx++){
         EXPECT_TRUE(group.GetKey(idx)->IsValid());

@@ -21,7 +21,7 @@ public:
     {
     }
 
-    const uint GroupHash;         // Hash value of this group
+    uint GroupHash;         // Hash value of this group
     QVector<uint> PKeys;    // Parent hash keys
     QVector<uint> CKeys;    // Children hash keys
     const QByteArray BGroupData;  // Binary representation of this group
@@ -45,6 +45,10 @@ public:
      */
     const Group getGroup() const;
 
+    inline void setHash(uint x){
+        _data->GroupHash = x;
+    }
+
     /**
      *  Returns a vector of versions that succeed the current one
      */
@@ -66,22 +70,27 @@ public:
     const QByteArray &getGroupByteArray() const;
 
     /**
-     *  Adds a child to a node in the version graph
-     *  @param version, whose hash key will be added to the parent node
+     *  Add the given parents to a node in the version graph
+     *  @param version vector, whose hash keys will be added to the child node
      */
-    void addChild(VersionNode &child);
+    void addParents(const QVector<VersionNode> &parents);
+
+    void addParents(QVector<uint> &parents);
 
     /**
-     *  Add a parent to a node in the version graph
-     *  @param version, whose hash key will be added to the child node
+     *  Adds the given children to a node in the version graph
+     *  @param version vectors, whose hash keys will be added to the parent node
      */
-    void addParent(VersionNode &parent);
+    void addChildren(const QVector<VersionNode> &children);
+
+    void addChildren(QVector<uint> const &children);
 
 
+    //TO BE REVISED
     /**
      * Returns the heads of the subgraph starting from vn
      */
-    QVector<VersionNode> getHeads(VersionNode &vn);
+    //QVector<VersionNode> getHeads(VersionNode &vn);
 
     static const VersionNode Zero;
 private:

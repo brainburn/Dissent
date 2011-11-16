@@ -70,14 +70,29 @@ const QByteArray &VersionNode::getGroupByteArray() const
     return _data->BGroupData;
 }
 
-void VersionNode::addParent(VersionNode &parent)
+void VersionNode::addParents(const QVector<VersionNode> &parents)
 {
-    _data->PKeys.append(parent.getHash());
+    for(int idx = 0; idx < parents.size(); idx++){
+        _data->PKeys.append(parents[idx].getHash());
+    }
 }
 
-void VersionNode::addChild(VersionNode &child)
+void VersionNode::addParents(QVector<uint> &parents)
 {
-    _data->CKeys.append(child.getHash());
+    _data->PKeys += parents;
+}
+
+
+void VersionNode::addChildren(const QVector<VersionNode> &children)
+{
+    for(int idx = 0; idx < children.size(); idx++){
+        _data->CKeys.append(children[idx].getHash());
+    }
+}
+
+void VersionNode::addChildren(QVector<uint> const &children)
+{
+    _data->CKeys += children;
 }
 
 QDataStream &operator << (QDataStream &out, const VersionNode node)
