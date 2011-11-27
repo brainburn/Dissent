@@ -5,37 +5,43 @@ using namespace Dissent::Anonymity;
 
 namespace Dissent {
 namespace Tests {
-TEST(VersionNode, Basic)
+
+TEST(VersionNode, Serialization)
 {
   DisableLogging();
-     Id id[10];
-     QByteArray qb;
-     QDataStream strm(&qb, QIODevice::ReadWrite);
+     Id                         id[10];
+     QByteArray                 binary_group_data;
+     QDataStream                strm(&binary_group_data, QIODevice::ReadWrite);
+     QVector<Id>                group_vector;
+     QVector<AsymmetricKey *>   key_vector;
 
-     QVector<Id> group_vector;
-     QVector<AsymmetricKey *> key_vector;
      for(int idx = 0; idx < 10; idx++) {
        AsymmetricKey *key0 = new CppPrivateKey();
        group_vector.append(id[idx]);
        key_vector.append(key0->GetPublicKey());
+       delete key0;
      }
 
-     Group group2(group_vector,key_vector);
-     strm << group2;
+     Group temp_group(group_vector,key_vector);
 
-     VersionNode vn(qb);
-     qb.clear();
+     strm << temp_group;
 
-     QByteArray z;
-     QDataStream strm1(&z, QIODevice::WriteOnly);
+     VersionNode vn(binary_group_data);
+     binary_group_data.clear();
+
+     QByteArray     z;
+     QDataStream    strm1(&z, QIODevice::WriteOnly);
+     QDataStream    strm2(&z, QIODevice::ReadOnly);
+
      strm1 << vn;
-     QDataStream strm2(&z, QIODevice::ReadOnly);
-     //int q = -7;
      strm2 >> vn;
 
      Group group = Group(QVector<Id>(0));
+
      vn.getGroup(group);
 
+     // Do the tests for Group.Basic. If it survives,
+     // serialization/deserializaion works
      for(int idx = 0; idx < 10; idx++){
          EXPECT_TRUE(group.GetKey(idx)->IsValid());
      }
@@ -72,5 +78,65 @@ TEST(VersionNode, Basic)
      }
   EnableLogging();
 }
+
+TEST(VersionNode, Methods)
+{
+    DisableLogging();
+    VersionNode             vn;
+    QVector<uint>           int_children;
+    QVector<uint>           int_parents;
+    QVector<VersionNode *>  node_children;
+    QVector<VersionNode *>  node_parents;
+
+    for(uint idx = 0; idx < 10; idx++){
+        VersionNode *temp_node;
+
+        temp_node = new VersionNode();
+        temp_node->setHash(idx*2);
+
+        if(idx < 5){
+            int_children.append(idx);
+            node_children.append(temp_node);
+        }else{
+            int_parents.append(idx);
+            node_parents.append(temp_node);
+        }
+    }
+
+    vn.setHash(1911);
+
+
+    EXPECT_EQ(vn.getHash(), 1911);
+    EXPECT_EQ(vn.getChildren().count(), 0);
+    EXPECT_EQ(vn.getParents().count(), 0);
+    EXPECT_EQ(vn.getGroupByteArray().count(), 0);
+
+    vn.addChildren(int_children);
+    vn.addParents(int_parents);
+
+    EXPECT_EQ(vn.getChildren().count(), 5);
+    EXPECT_EQ(vn.getParents().count(), 5);
+
+    vn.addChildren(node_children);
+    vn.addParents(node_parents);
+
+    EXPECT_EQ(vn.getChildren().count(), 10);
+    EXPECT_EQ(vn.getParents().count(), 10);
+
+    for(int idx = 0; idx < 5; idx++){
+        EXPECT_EQ(vn.getChildren()[idx], idx);
+        EXPECT_EQ(vn.getChildren()[idx+5],2*idx);
+        EXPECT_EQ(vn.getParents()[idx], idx+5);
+        EXPECT_EQ(vn.getParents()[idx+5],2*(idx+5));
+    }
+
+    for(int idx = 0; idx < 5; idx++){
+        delete node_children[idx];
+        delete node_parents[idx];
+    }
+    EnableLogging();
+}
+
 }
 }
+

@@ -17,10 +17,6 @@ namespace Anonymity {
                                   QByteArray(0));
   }
 
-  VersionNode::VersionNode(int x){
-    _data = 0;
-  }
-
   VersionNode::VersionNode(const QByteArray _b_group_data)
   {
       _data = new VersionNodeData(qHash(_b_group_data),

@@ -2,7 +2,7 @@
 
 namespace Dissent {
 namespace Anonymity {
-    VersionNode VersionGraph::Zero = VersionNode(0);
+    VersionNode VersionGraph::Zero = VersionNode();
 
 VersionGraph::VersionGraph()
 {

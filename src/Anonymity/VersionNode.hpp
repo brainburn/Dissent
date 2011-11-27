@@ -32,7 +32,6 @@ class VersionNode
 public:
     VersionNode();
 
-    VersionNode(int x);
     VersionNode(QByteArray _b_group_data);
 
     VersionNode(const uint _group_hash, const QVector<uint> _pkeys,
@@ -45,9 +44,10 @@ public:
      */
     const Group getGroup(Group &group) const;
 
-    inline void setHash(uint x){
-        _data->GroupHash = x;
-    }
+    /**
+     *  Sets the hash value of current version. For testing purposes.
+     */
+    inline void setHash(uint x){ _data->GroupHash = x; }
 
     /**
      *  Returns a vector of versions that succeed the current one
@@ -84,13 +84,6 @@ public:
     void addChildren(const QVector<VersionNode *> &children);
 
     void addChildren(QVector<uint> const &children);
-
-
-    //TO BE REVISED
-    /**
-     * Returns the heads of the subgraph starting from vn
-     */
-    //QVector<VersionNode> getHeads(VersionNode &vn);
 
     static const VersionNode Zero;
 private:

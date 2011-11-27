@@ -54,6 +54,7 @@ namespace Tests {
     strm3 << vg;
     QDataStream strm4(&w, QIODevice::ReadOnly);
     strm4 >> vg;
+
     VersionNode vn2 = vg.getVersion(vg.getCurrentVersion());
     VersionNode vn3 = vg.getVersion(vg.getCurrentVersion());
     VersionNode vn4 = vg.getVersion(vg.getCurrentVersion());
