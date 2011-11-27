@@ -40,12 +40,10 @@ VersionNode::VersionNode(const uint _group_hash,
                                 _b_group_data);
 }
 
-//This doesn't look well...
-const Group VersionNode::getGroup() const
+const Group VersionNode::getGroup(Group &group) const
 {
     QByteArray temp_b_group_data(_data->BGroupData);
     QDataStream stream(&temp_b_group_data, QIODevice::ReadOnly);
-    Group group(QVector<Id>(0));
     stream >> group;
     return group;
 }
@@ -70,10 +68,10 @@ const QByteArray &VersionNode::getGroupByteArray() const
     return _data->BGroupData;
 }
 
-void VersionNode::addParents(const QVector<VersionNode> &parents)
+void VersionNode::addParents(const QVector<VersionNode *> &parents)
 {
     for(int idx = 0; idx < parents.size(); idx++){
-        _data->PKeys.append(parents[idx].getHash());
+        _data->PKeys.append(parents[idx]->getHash());
     }
 }
 
@@ -83,10 +81,10 @@ void VersionNode::addParents(QVector<uint> &parents)
 }
 
 
-void VersionNode::addChildren(const QVector<VersionNode> &children)
+void VersionNode::addChildren(const QVector<VersionNode *> &children)
 {
     for(int idx = 0; idx < children.size(); idx++){
-        _data->CKeys.append(children[idx].getHash());
+        _data->CKeys.append(children[idx]->getHash());
     }
 }
 

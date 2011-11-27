@@ -100,22 +100,24 @@ uint VersionGraph::setCurrentVersion(const VersionNode vn)
     return this->getCurrentVersion();
 }
 
-void VersionGraph::addNew(QVector<VersionNode> &parents, VersionNode &vn){
-    QVector<VersionNode> new_child;
-
-    new_child += vn;
+void VersionGraph::addNew(QVector<uint> &parents, VersionNode &vn){
+    QVector<VersionNode *> new_child;
+    uint hash_key = vn.getHash();
+    new_child += &vn;
 
     _data->VersionDB.insert(vn.getHash(), vn);
 
-    vn.addParents(parents);
-
     for(int idx = 0; idx < parents.size(); idx++){
-        parents[idx].addChildren(new_child);
+        this->getVersion(parents[idx]).addChildren(new_child);
     }
+
+    this->getVersion(hash_key).addParents(parents);
+
+
 
 }
 
-void VersionGraph::getHeads(QHash<uint, uint> &heads,uint v_hash){
+void VersionGraph::getHeads(QHash<uint, uint> &heads, uint v_hash){
     VersionNode &vn = this->getVersion(v_hash);
     const QVector<uint> &children = vn.getChildren();
     if(children.size() == 0){

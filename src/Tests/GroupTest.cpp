@@ -55,14 +55,49 @@ namespace Tests {
     QDataStream strm4(&w, QIODevice::ReadOnly);
     strm4 >> vg;
     VersionNode vn2 = vg.getVersion(vg.getCurrentVersion());
-    vn2.setHash(1337);
+    VersionNode vn3 = vg.getVersion(vg.getCurrentVersion());
+    VersionNode vn4 = vg.getVersion(vg.getCurrentVersion());
+    VersionNode vn5 = vg.getVersion(vg.getCurrentVersion());
+    VersionNode vn6 = vg.getVersion(vg.getCurrentVersion());
+    //vn.setHash(1);
+    vn2.setHash(2);
+    vn3.setHash(3);
+    vn4.setHash(4);
+    vn5.setHash(5);
+    vn6.setHash(6);
+    //vn2.setHash(1337);
 
 
-    Group const &group = vg.getVersion(vg.getCurrentVersion()).getGroup();
+    Group group = Group(QVector<Id>(0));
+    vg.getVersion(vg.getCurrentVersion()).getGroup(group);
 
+    std::cout << "Version Hash 1: " <<vn.getHash() << std::endl;
     std::cout << "Version Hash 2: " <<vn2.getHash() << std::endl;
-    std::cout << "Version Hash: " <<vg.getVersion(vg.getCurrentVersion()).getHash() << std::endl;
+    std::cout << "Version Hash 3: " <<vn3.getHash() << std::endl;
 
+    QVector<uint> p_vector;
+    p_vector += vn.getHash();
+
+    std::cout <<  "Children count 1: " << vn.getChildren().count() << std::endl;
+    std::cout <<  "Parent count 1: " << vn2.getParents().count() << std::endl;
+    vg.addNew(p_vector, vn2);
+    vg.addNew(p_vector, vn5);
+    p_vector.clear();
+    p_vector += vn2.getHash();
+    vg.addNew(p_vector, vn3);
+    vg.addNew(p_vector, vn4);
+    p_vector.clear();
+    p_vector += vn5.getHash();
+    p_vector += vn3.getHash();
+    p_vector += vn4.getHash();
+    vg.addNew(p_vector, vn6);
+    std::cout <<  "Children count 2: " << vn.getChildren().count() << std::endl;
+    std::cout <<  "Parent count 2: " << vn2.getParents().count() << std::endl;
+
+    QHash<uint, uint> heads;
+    vg.getHeads(heads, vn.getHash());
+
+    std::cout <<  "Heads count 1: " << heads.count() << std::endl;
     //Test keys
     for(int idx = 0; idx < 10; idx++){
         EXPECT_TRUE(group.GetKey(idx)->IsValid());

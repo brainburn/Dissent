@@ -65,11 +65,11 @@ public:
     /**
      * Adds a new version as a child to the given parents
      */
-    void addNew(QVector<VersionNode> &parents, VersionNode &vn);
+    void addNew(QVector<uint> &parents, VersionNode &vn);
 
     /**
      *  Returns the heads of the subgraph starting from vn
-     *  DOESNT DETECT CYCLES!!!
+     *  !! Does not detect cycles !!
      */
 
     void getHeads(QHash<uint, uint> &heads,uint v_hash);

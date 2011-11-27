@@ -43,7 +43,7 @@ public:
     /**
      *  Returns the group represented by the version's hash value
      */
-    const Group getGroup() const;
+    const Group getGroup(Group &group) const;
 
     inline void setHash(uint x){
         _data->GroupHash = x;
@@ -73,7 +73,7 @@ public:
      *  Add the given parents to a node in the version graph
      *  @param version vector, whose hash keys will be added to the child node
      */
-    void addParents(const QVector<VersionNode> &parents);
+    void addParents(const QVector<VersionNode *> &parents);
 
     void addParents(QVector<uint> &parents);
 
@@ -81,7 +81,7 @@ public:
      *  Adds the given children to a node in the version graph
      *  @param version vectors, whose hash keys will be added to the parent node
      */
-    void addChildren(const QVector<VersionNode> &children);
+    void addChildren(const QVector<VersionNode *> &children);
 
     void addChildren(QVector<uint> const &children);
 
