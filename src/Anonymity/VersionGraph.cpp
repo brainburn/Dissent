@@ -6,24 +6,23 @@ namespace Anonymity {
 
 VersionGraph::VersionGraph()
 {
-    _data = new VersionGraphData(0, QHash<uint, VersionNode>());
+    _data = new VersionGraphData(QByteArray(0), QHash<QByteArray, VersionNode>());
 }
 
 
 VersionGraph::VersionGraph(const VersionNode & _version)
 {
-    QHash<uint, VersionNode> qh;
-    std::cout << "CONSTR: hash assigned: " << qHash(_version.getGroupByteArray()) << std::endl;
-    qh[qHash(_version.getGroupByteArray())] = _version;
-    _data = new VersionGraphData(qHash(_version.getGroupByteArray()),qh);
+    QHash<QByteArray, VersionNode> qh;
+    qh[_version.getHash()] = _version;
+    _data = new VersionGraphData(_version.getHash(),qh);
 }
 
 VersionGraph::VersionGraph(const QString &filename)
 {
     QByteArray data;
     QDataStream stream (&data, QIODevice::ReadOnly);
-    QHash<uint, VersionNode> qh;
-    uint current_version;
+    QHash<QByteArray, VersionNode> qh;
+    QByteArray current_version;
 
     if(!initFromFile(filename, data))
     {
@@ -38,8 +37,8 @@ VersionGraph::VersionGraph(const QString &filename)
 }
 
 
-VersionGraph::VersionGraph(const uint &_current_version,
-             const QHash<uint, VersionNode> &_version_db)
+VersionGraph::VersionGraph(const QByteArray &_current_version,
+             const QHash<QByteArray, VersionNode> &_version_db)
 {
     _data = new VersionGraphData(_current_version, _version_db);
 }
@@ -75,17 +74,17 @@ bool VersionGraph::save(const QString &filename)
     return true;
 }
 
-const QHash<uint, VersionNode> &VersionGraph::getCurrentVersionDb() const
+const QHash<QByteArray, VersionNode> &VersionGraph::getCurrentVersionDb() const
 {
     return _data->VersionDB;
 }
 
-const uint &VersionGraph::getCurrentVersion() const
+const QByteArray &VersionGraph::getCurrentVersion() const
 {
     return _data->CurrentVersion;
 }
 
-VersionNode &VersionGraph::getVersion(uint hash_key)
+VersionNode &VersionGraph::getVersion(QByteArray hash_key)
 {
     if(!_data->VersionDB.contains(hash_key)){
         return VersionGraph::Zero;
@@ -94,12 +93,13 @@ VersionNode &VersionGraph::getVersion(uint hash_key)
 }
 
 
-uint VersionGraph::setCurrentVersion(const VersionNode vn)
+QByteArray VersionGraph::setCurrentVersion(const VersionNode vn)
 {
     _data->CurrentVersion = vn.getHash();
     return this->getCurrentVersion();
 }
 
+/*
 void VersionGraph::addNew(QVector<uint> &parents, VersionNode &vn){
     QVector<VersionNode *> new_child;
     uint hash_key = vn.getHash();
@@ -113,10 +113,9 @@ void VersionGraph::addNew(QVector<uint> &parents, VersionNode &vn){
 
     this->getVersion(hash_key).addParents(parents);
 
-
-
 }
-
+*/
+/*
 void VersionGraph::getHeads(QHash<uint, uint> &heads, uint v_hash){
     VersionNode &vn = this->getVersion(v_hash);
     const QVector<uint> &children = vn.getChildren();
@@ -132,6 +131,7 @@ void VersionGraph::getHeads(QHash<uint, uint> &heads, uint v_hash){
         }
     }
 }
+*/
 
 QDataStream &operator << (QDataStream &out, const VersionGraph graph)
 {
@@ -141,8 +141,8 @@ QDataStream &operator << (QDataStream &out, const VersionGraph graph)
 
 QDataStream &operator >> (QDataStream &in, VersionGraph &graph)
 {
-    uint _hash_key;
-    QHash<uint, VersionNode> _vdb;
+    QByteArray _hash_key;
+    QHash<QByteArray, VersionNode> _vdb;
 
     in >> _hash_key;
     in >> _vdb;

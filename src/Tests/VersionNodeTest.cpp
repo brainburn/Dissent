@@ -83,55 +83,41 @@ TEST(VersionNode, Methods)
 {
     DisableLogging();
     VersionNode             vn;
-    QVector<uint>           int_children;
-    QVector<uint>           int_parents;
-    QVector<VersionNode *>  node_children;
     QVector<VersionNode *>  node_parents;
-
+    QVector<QByteArray> pv;
+    QVector<QByteArray> cv;
     for(uint idx = 0; idx < 10; idx++){
         VersionNode *temp_node;
 
+        QByteArray qb;
+
+        qb += (idx);
+        pv.append(qb);
         temp_node = new VersionNode();
-        temp_node->setHash(idx*2);
+        temp_node->setHash(idx+48);
+        temp_node->addParents(pv);
 
-        if(idx < 5){
-            int_children.append(idx);
-            node_children.append(temp_node);
-        }else{
-            int_parents.append(idx);
-            node_parents.append(temp_node);
-        }
+        node_parents.append(temp_node);
     }
 
-    vn.setHash(1911);
+    vn.addParents(pv);
 
+    VersionNode vn2(QByteArray(0), pv, pv);
+    VersionNode vn3(QByteArray(0), pv, cv);
 
-    EXPECT_EQ(vn.getHash(), 1911);
-    EXPECT_EQ(vn.getChildren().count(), 0);
-    EXPECT_EQ(vn.getParents().count(), 0);
-    EXPECT_EQ(vn.getGroupByteArray().count(), 0);
-
-    vn.addChildren(int_children);
-    vn.addParents(int_parents);
-
-    EXPECT_EQ(vn.getChildren().count(), 5);
-    EXPECT_EQ(vn.getParents().count(), 5);
-
-    vn.addChildren(node_children);
-    vn.addParents(node_parents);
-
-    EXPECT_EQ(vn.getChildren().count(), 10);
+    EXPECT_EQ(vn.getParents(), vn2.getParents());
+    EXPECT_EQ(vn2.getParents(), vn3.getParents());
     EXPECT_EQ(vn.getParents().count(), 10);
+    vn.addParents(node_parents);
+    EXPECT_EQ(vn.getParents().count(), 20);
+
+
+    EXPECT_EQ(vn2.getHash(), vn2.getHash());
+    EXPECT_NE(vn2.getHash(), vn.getHash());
+    EXPECT_NE(vn2.getHash(), vn3.getHash());
+    EXPECT_NE(vn.getHash(), vn3.getHash());
 
     for(int idx = 0; idx < 5; idx++){
-        EXPECT_EQ(vn.getChildren()[idx], idx);
-        EXPECT_EQ(vn.getChildren()[idx+5],2*idx);
-        EXPECT_EQ(vn.getParents()[idx], idx+5);
-        EXPECT_EQ(vn.getParents()[idx+5],2*(idx+5));
-    }
-
-    for(int idx = 0; idx < 5; idx++){
-        delete node_children[idx];
         delete node_parents[idx];
     }
     EnableLogging();

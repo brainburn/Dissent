@@ -11,26 +11,52 @@ namespace Anonymity {
 
   VersionNode::VersionNode()
   {
-      _data = new VersionNodeData(0,
-                                  QVector<uint>(0),
-                                  QVector<uint>(0),
+      _data = new VersionNodeData(QByteArray(0),
+                                  QVector<QByteArray>(0),
+                                  QVector<QByteArray>(0),
                                   QByteArray(0));
   }
 
   VersionNode::VersionNode(const QByteArray _b_group_data)
   {
-      _data = new VersionNodeData(qHash(_b_group_data),
-                                  QVector<uint>(0),
-                                  QVector<uint>(0),
+      QByteArray _byte_buffer;
+      QDataStream stream(&_byte_buffer, QIODevice::WriteOnly);
+      Crypto::CppHash h;
+
+      stream << _b_group_data;
+      stream << QByteArray(0);
+      stream << QByteArray(0);
+
+      _data = new VersionNodeData(h.ComputeHash(_byte_buffer),
+                                  QVector<QByteArray>(0),
+                                  QVector<QByteArray>(0),
                                   _b_group_data);
   }
 
-VersionNode::VersionNode(const uint _group_hash,
-                         const QVector<uint> _pkeys,
-                         const QVector<uint> _ckeys,
-                         const QByteArray _b_group_data)
+VersionNode::VersionNode(const QByteArray _b_group_data,
+                         const QVector<QByteArray> _pkeys,
+                         const QVector<QByteArray> _ckeys)
 {
-    _data = new VersionNodeData(_group_hash,
+    QByteArray _byte_buffer;
+    QDataStream stream(&_byte_buffer, QIODevice::WriteOnly);
+    Crypto::CppHash h;
+
+    stream << _b_group_data;
+    stream << _pkeys;
+    stream << _ckeys;
+
+    _data = new VersionNodeData(h.ComputeHash(_byte_buffer),
+                                _pkeys,
+                                _ckeys,
+                                _b_group_data);
+}
+
+VersionNode::VersionNode(const QByteArray _version_hash,
+            const QVector<QByteArray> _pkeys,
+            const QVector<QByteArray> _ckeys,
+            const QByteArray _b_group_data)
+{
+    _data = new VersionNodeData(_version_hash,
                                 _pkeys,
                                 _ckeys,
                                 _b_group_data);
@@ -44,19 +70,19 @@ const Group VersionNode::getGroup(Group &group) const
     return group;
 }
 
-const QVector<uint> &VersionNode::getChildren() const
+const QVector<QByteArray> &VersionNode::getChildren() const
 {
     return _data->CKeys;
 }
 
-const QVector<uint> &VersionNode::getParents() const
+const QVector<QByteArray> &VersionNode::getParents() const
 {
     return _data->PKeys;
 }
 
-const uint &VersionNode::getHash() const
+const QByteArray &VersionNode::getHash() const
 {
-    return _data->GroupHash;
+    return _data->VersionHash;
 }
 
 const QByteArray &VersionNode::getGroupByteArray() const
@@ -71,7 +97,7 @@ void VersionNode::addParents(const QVector<VersionNode *> &parents)
     }
 }
 
-void VersionNode::addParents(QVector<uint> &parents)
+void VersionNode::addParents(QVector<QByteArray> &parents)
 {
     _data->PKeys += parents;
 }
@@ -84,7 +110,7 @@ void VersionNode::addChildren(const QVector<VersionNode *> &children)
     }
 }
 
-void VersionNode::addChildren(QVector<uint> const &children)
+void VersionNode::addChildren(QVector<QByteArray> const &children)
 {
     _data->CKeys += children;
 }
@@ -98,17 +124,17 @@ QDataStream &operator << (QDataStream &out, const VersionNode node)
 
 QDataStream &operator >> (QDataStream &in, VersionNode &node)
 {
-    uint _group_hash;
-    QVector<uint> _pkeys;
-    QVector<uint> _ckeys;
+    QByteArray _version_hash;
+    QVector<QByteArray> _pkeys;
+    QVector<QByteArray> _ckeys;
     QByteArray _b_group_data;
 
-    in >> _group_hash;
+    in >> _version_hash;
     in >> _pkeys;
     in >> _ckeys;
     in >> _b_group_data;
 
-    node = VersionNode(_group_hash, _pkeys, _ckeys, _b_group_data);
+    node = VersionNode(_version_hash, _pkeys, _ckeys, _b_group_data);
 
 
     return in;

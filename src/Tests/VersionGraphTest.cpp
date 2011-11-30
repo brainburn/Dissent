@@ -33,6 +33,11 @@ TEST(VersionGraph, Basic)
 
     VersionGraph vg = VersionGraph("GraphFile");
 
+    QByteArray w;
+    QDataStream strm3(&w, QIODevice::WriteOnly);
+    strm3 << vg;
+    QDataStream strm4(&w, QIODevice::ReadOnly);
+    strm4 >> vg;
 
     EnableLogging();
 }

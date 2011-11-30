@@ -11,25 +11,28 @@ namespace Anonymity{
  */
 class VersionGraphData : public QSharedData{
 public:
-    VersionGraphData(const uint current_version,
-                     const QHash<uint, VersionNode> version_db):
+    VersionGraphData(const QByteArray current_version,
+                     const QHash<QByteArray, VersionNode> version_db):
         CurrentVersion(current_version),
         VersionDB(version_db)
     {
     }
 
-    uint CurrentVersion;
-    QHash<uint, VersionNode> VersionDB;
+    QByteArray CurrentVersion;
+    QHash<QByteArray, VersionNode> VersionDB;
 };
 
 class VersionGraph
 {
 public:
     VersionGraph();
+
     VersionGraph(const VersionNode &_version);
+
     VersionGraph(const QString &filename);
-    VersionGraph(const uint &_current_version,
-                 const QHash<uint, VersionNode> &_version_db);
+
+    VersionGraph(const QByteArray &_current_version,
+                 const QHash<QByteArray, VersionNode> &_version_db);
 
 
     /**
@@ -40,22 +43,22 @@ public:
     /**
      * Returns the current active version of the group
      */
-    const uint &getCurrentVersion() const;
+    const QByteArray &getCurrentVersion() const;
 
     /**
      * Returns the version graph
      */
-    const QHash<uint, VersionNode> &getCurrentVersionDb() const;
+    const QHash<QByteArray, VersionNode> &getCurrentVersionDb() const;
 
     /**
      * Change the current active version
      */
-    uint setCurrentVersion(const VersionNode vn);
+    QByteArray setCurrentVersion(const VersionNode vn);
 
     /**
      * Returns the version associated with the given hash key
      */
-    VersionNode& getVersion(uint hash_key);
+    VersionNode& getVersion(QByteArray hash_key);
 
     /**
      * Confirms the given version ??
@@ -65,14 +68,14 @@ public:
     /**
      * Adds a new version as a child to the given parents
      */
-    void addNew(QVector<uint> &parents, VersionNode &vn);
+    //void addNew(QVector<uint> &parents, VersionNode &vn);
 
     /**
      *  Returns the heads of the subgraph starting from vn
      *  !! Does not detect cycles !!
      */
 
-    void getHeads(QHash<uint, uint> &heads,uint v_hash);
+    //void getHeads(QHash<uint, uint> &heads,uint v_hash);
 
     static VersionNode Zero;
 
