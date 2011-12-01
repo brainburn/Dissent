@@ -109,7 +109,7 @@ QDataStream &operator >> (QDataStream &in, VersionNode &node)
     in >> _b_group_data;
     in >> _group_policy;
 
-    node = VersionNode(_version_hash, _pkeys, _b_group_data, QMap<QString, QVariant>());
+    node = VersionNode(_version_hash, _pkeys, _b_group_data, _group_policy);
 
 
     return in;
