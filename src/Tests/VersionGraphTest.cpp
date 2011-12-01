@@ -16,6 +16,10 @@ TEST(VersionGraph, Basic)
     QVector<Id>                 group_vector2;
     QVector<AsymmetricKey *>    key_vector2;
 
+    QMap<QString, QVariant>     gpolicy;
+
+    gpolicy.insert("Quorum", 10);
+
     for(int idx = 0; idx < 10; idx++) {
       AsymmetricKey *key0 = new CppPrivateKey();
       group_vector.append(id[idx]);
@@ -44,20 +48,20 @@ TEST(VersionGraph, Basic)
 
     parents_vector.append(vn.getHash());
 
-    VersionNode vn2 = VersionNode(qb, parents_vector);
+    VersionNode vn2 = VersionNode(qb, parents_vector, gpolicy);
 
     parents_vector.clear();
     parents_vector.append(vn2.getHash());
 
 
-    VersionNode vn3 = VersionNode(qb, parents_vector);
-    VersionNode vn4 = VersionNode(qb2, parents_vector);
+    VersionNode vn3 = VersionNode(qb, parents_vector, gpolicy);
+    VersionNode vn4 = VersionNode(qb2, parents_vector, gpolicy);
 
     parents_vector.clear();
     parents_vector.append(vn4.getHash());
 
-    VersionNode vn5 = VersionNode(qb, parents_vector);
-    VersionNode vn6 = VersionNode(qb2, parents_vector);
+    VersionNode vn5 = VersionNode(qb, parents_vector, gpolicy);
+    VersionNode vn6 = VersionNode(qb2, parents_vector, gpolicy);
 
 
 
@@ -65,7 +69,7 @@ TEST(VersionGraph, Basic)
     parents_vector.append(vn5.getHash());
     parents_vector.append(vn6.getHash());
 
-    VersionNode vn7 = VersionNode(qb, parents_vector);
+    VersionNode vn7 = VersionNode(qb, parents_vector, gpolicy);
 
     vg2.addNew(vn2);
     vg2.addNew(vn3);

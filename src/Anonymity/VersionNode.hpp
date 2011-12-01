@@ -4,6 +4,8 @@
 #include "Group.hpp"
 #include "Crypto/CppHash.hpp"
 #include <QHash>
+#include <QVariant>
+#include <QMap>
 
 
 namespace Dissent{
@@ -13,15 +15,18 @@ class VersionNodeData : public QSharedData{
 public:
     VersionNodeData(const QByteArray version_hash,
                     const QVector<QByteArray> pkeys,
-                    const QByteArray b_group_data):
+                    const QByteArray b_group_data,
+                    const QMap<QString, QVariant> group_policy):
         VersionHash(version_hash),
         PKeys(pkeys),
-        BGroupData(b_group_data)
+        BGroupData(b_group_data),
+        GroupPolicy(group_policy)
     {
     }
     const QByteArray                VersionHash; // Hash value of this group
     const QVector<QByteArray>       PKeys;       // Parent hash keys
     const QByteArray                BGroupData;  // Binary representation of this group
+    const QMap<QString, QVariant>   GroupPolicy; // Contains the group policy of node
 };
 
 class VersionNode
@@ -32,11 +37,13 @@ public:
     VersionNode(const QByteArray _b_group_data);
 
     VersionNode(const QByteArray _b_group_data,
-                const QVector<QByteArray> _pkeys);
+                const QVector<QByteArray> _pkeys,
+                const QMap<QString, QVariant> _group_policy);
 
     VersionNode(const QByteArray _version_hash,
                 const QVector<QByteArray> _pkeys,
-                const QByteArray _b_group_data);
+                const QByteArray _b_group_data,
+                const QMap<QString, QVariant> _group_policy);
 
 
 
@@ -47,6 +54,11 @@ public:
 
     /**
      *  Returns a vector of the parents of the current version
+     */
+    const QMap<QString, QVariant> &getPolicy() const;
+
+    /**
+     *  Returns a QMap of the policy of the current version
      */
     const QVector<QByteArray> &getParents() const;
 

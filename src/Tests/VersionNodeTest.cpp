@@ -86,6 +86,10 @@ TEST(VersionNode, Methods)
     QVector<VersionNode *>  node_parents;
     QVector<QByteArray> pv;
     QVector<QByteArray> cv;
+    QMap<QString, QVariant> gpolicy;
+
+    gpolicy.insert("Quorum", 10);
+
     for(uint idx = 0; idx < 10; idx++){
         VersionNode *temp_node;
 
@@ -93,13 +97,13 @@ TEST(VersionNode, Methods)
 
         qb += (idx);
         pv.append(qb);
-        temp_node = new VersionNode(qb, pv, QByteArray());
+        temp_node = new VersionNode(qb, pv, QByteArray(), gpolicy);
 
         node_parents.append(temp_node);
     }
 
-    VersionNode vn2(QByteArray(0), pv);
-    VersionNode vn3(QByteArray(0), cv);
+    VersionNode vn2(QByteArray(0), pv, gpolicy);
+    VersionNode vn3(QByteArray(0), cv, gpolicy);
 
     EXPECT_EQ(vn2.getHash(), vn2.getHash());
     EXPECT_NE(vn2.getHash(), vn.getHash());
