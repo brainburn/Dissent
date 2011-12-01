@@ -12,14 +12,17 @@ namespace Anonymity{
 class VersionGraphData : public QSharedData{
 public:
     VersionGraphData(const QByteArray current_version,
-                     const QHash<QByteArray, VersionNode> version_db):
+                     const QHash<QByteArray, VersionNode> version_db,
+                     const QHash<QByteArray, QVector<QByteArray> > children_db):
         CurrentVersion(current_version),
-        VersionDB(version_db)
+        VersionDB(version_db),
+        ChildrenDB(children_db)
     {
     }
 
     QByteArray CurrentVersion;
     QHash<QByteArray, VersionNode> VersionDB;
+    QHash<QByteArray, QVector<QByteArray> > ChildrenDB;
 };
 
 class VersionGraph
@@ -32,7 +35,8 @@ public:
     VersionGraph(const QString &filename);
 
     VersionGraph(const QByteArray &_current_version,
-                 const QHash<QByteArray, VersionNode> &_version_db);
+                 const QHash<QByteArray, VersionNode> &_version_db,
+                 const QHash<QByteArray, QVector<QByteArray> > &children_db);
 
 
     /**
@@ -46,9 +50,14 @@ public:
     const QByteArray &getCurrentVersion() const;
 
     /**
-     * Returns the version graph
+     * Returns the version nodes database
      */
     const QHash<QByteArray, VersionNode> &getCurrentVersionDb() const;
+
+    /**
+     * Returns the chilren edges database
+     */
+    const  QHash<QByteArray, QVector<QByteArray> > &getCurrentChildrenDb() const;
 
     /**
      * Change the current active version
@@ -56,9 +65,22 @@ public:
     QByteArray setCurrentVersion(const VersionNode vn);
 
     /**
-     * Returns the version associated with the given hash key
+     * Returns the version associated with the given hash key CONST ME!
      */
     VersionNode& getVersion(QByteArray hash_key);
+
+    /**
+     *  Returns a vector of versions that succeed the current one
+     */
+    QVector<QByteArray> getChildren(const QByteArray version_hash) const;
+
+    /**
+     *  Adds the given children to a node in the version graph
+     *  @param version vectors, whose hash keys will be added to the parent node
+     */
+    void addChildren(const QByteArray version_hash ,const QVector<VersionNode *> &children);
+
+    void addChildren(const QByteArray version_hash, QVector<QByteArray> const &children);
 
     /**
      * Confirms the given version ??
@@ -68,14 +90,14 @@ public:
     /**
      * Adds a new version as a child to the given parents
      */
-    //void addNew(QVector<uint> &parents, VersionNode &vn);
+    void addNew(VersionNode &vn);
 
     /**
      *  Returns the heads of the subgraph starting from vn
      *  !! Does not detect cycles !!
      */
 
-    //void getHeads(QHash<uint, uint> &heads,uint v_hash);
+    void getHeads(QHash<QByteArray, QByteArray> &heads,QByteArray v_hash);
 
     static VersionNode Zero;
 

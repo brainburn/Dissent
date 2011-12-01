@@ -93,24 +93,13 @@ TEST(VersionNode, Methods)
 
         qb += (idx);
         pv.append(qb);
-        temp_node = new VersionNode();
-        temp_node->setHash(idx+48);
-        temp_node->addParents(pv);
+        temp_node = new VersionNode(qb, pv, QByteArray());
 
         node_parents.append(temp_node);
     }
 
-    vn.addParents(pv);
-
-    VersionNode vn2(QByteArray(0), pv, pv);
-    VersionNode vn3(QByteArray(0), pv, cv);
-
-    EXPECT_EQ(vn.getParents(), vn2.getParents());
-    EXPECT_EQ(vn2.getParents(), vn3.getParents());
-    EXPECT_EQ(vn.getParents().count(), 10);
-    vn.addParents(node_parents);
-    EXPECT_EQ(vn.getParents().count(), 20);
-
+    VersionNode vn2(QByteArray(0), pv);
+    VersionNode vn3(QByteArray(0), cv);
 
     EXPECT_EQ(vn2.getHash(), vn2.getHash());
     EXPECT_NE(vn2.getHash(), vn.getHash());

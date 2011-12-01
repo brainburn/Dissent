@@ -13,25 +13,77 @@ TEST(VersionGraph, Basic)
     QVector<Id>                 group_vector;
     QVector<AsymmetricKey *>    key_vector;
 
+    QVector<Id>                 group_vector2;
+    QVector<AsymmetricKey *>    key_vector2;
+
     for(int idx = 0; idx < 10; idx++) {
       AsymmetricKey *key0 = new CppPrivateKey();
       group_vector.append(id[idx]);
       key_vector.append(key0->GetPublicKey());
+
+      if(idx > 4){
+          group_vector2.append(id[idx]);
+          key_vector2.append(key0->GetPublicKey());
+      }
     }
 
     Group       group(group_vector,key_vector);
+    Group       group2(group_vector2,key_vector2);
     QByteArray  qb;
     QDataStream strm(&qb, QIODevice::ReadWrite);
+    QByteArray  qb2;
+    QDataStream strm2(&qb2, QIODevice::ReadWrite);
 
     strm << group;
+    strm2 << group2;
 
     VersionNode vn(qb);
-
     VersionGraph vg2 = VersionGraph(vn);
+
+    QVector<QByteArray> parents_vector;
+
+    parents_vector.append(vn.getHash());
+
+    VersionNode vn2 = VersionNode(qb, parents_vector);
+
+    parents_vector.clear();
+    parents_vector.append(vn2.getHash());
+
+
+    VersionNode vn3 = VersionNode(qb, parents_vector);
+    VersionNode vn4 = VersionNode(qb2, parents_vector);
+
+    parents_vector.clear();
+    parents_vector.append(vn4.getHash());
+
+    VersionNode vn5 = VersionNode(qb, parents_vector);
+    VersionNode vn6 = VersionNode(qb2, parents_vector);
+
+
+
+    parents_vector.clear();
+    parents_vector.append(vn5.getHash());
+    parents_vector.append(vn6.getHash());
+
+    VersionNode vn7 = VersionNode(qb, parents_vector);
+
+    vg2.addNew(vn2);
+    vg2.addNew(vn3);
+    vg2.addNew(vn4);
+    vg2.addNew(vn5);
+    vg2.addNew(vn6);
+    vg2.addNew(vn7);
+
 
     vg2.save("GraphFile");
 
     VersionGraph vg = VersionGraph("GraphFile");
+
+    QHash<QByteArray, QByteArray> heads;
+
+    vg.getHeads(heads, vn4.getHash());
+
+    std::cout << "Headcount : " << heads.count() << std::endl;
 
     QByteArray w;
     QDataStream strm3(&w, QIODevice::WriteOnly);
