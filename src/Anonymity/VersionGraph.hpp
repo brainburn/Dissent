@@ -20,9 +20,10 @@ public:
     {
     }
 
-    QByteArray CurrentVersion;
-    QHash<QByteArray, VersionNode> VersionDB;
+    QByteArray                              CurrentVersion;
+    QHash<QByteArray, VersionNode>          VersionDB;
     QHash<QByteArray, QVector<QByteArray> > ChildrenDB;
+
 };
 
 class VersionGraph
@@ -83,21 +84,32 @@ public:
     void addChildren(const QByteArray version_hash, QVector<QByteArray> const &children);
 
     /**
-     * Confirms the given version ??
+     *  Confirms the given version ??
+     *  @param vn VersionNode to be confirmed
      */
     int confirm(VersionNode vn);
 
     /**
-     * Adds a new version as a child to the given parents
+     *  Adds a new version as a child to the given parents
+     *  @param vn VersionNode to be added
      */
     void addNew(VersionNode &vn);
 
     /**
      *  Returns the heads of the subgraph starting from vn
-     *  !! Does not detect cycles !!
+     *  @param the heads descending from version v_hash
+     *  @param v_hash the version, the heads descending from which we are looking for
      */
+    void getHeads(QVector<QByteArray> &heads,QByteArray v_hash);
 
-    void getHeads(QHash<QByteArray, QByteArray> &heads,QByteArray v_hash);
+    /**
+     *  Sets intersection to the intersection and symmetric_difference the symmetric difference
+     *  of the sets of members represented by the head version nodes starting,
+     *  descending from v_hash.
+     *  @param intersection the intersection of the graph heads
+     *  @param symmetric_difference the symmetric difference of the graph heads
+     */
+    void getHeadsIaSD(Group &intersection, Group &symmetric_difference, QByteArray v_hash);
 
     static VersionNode Zero;
 

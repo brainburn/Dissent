@@ -25,7 +25,7 @@ TEST(VersionGraph, Basic)
       group_vector.append(id[idx]);
       key_vector.append(key0->GetPublicKey());
 
-      if(idx > 4){
+      if(idx > 3){
           group_vector2.append(id[idx]);
           key_vector2.append(key0->GetPublicKey());
       }
@@ -54,8 +54,8 @@ TEST(VersionGraph, Basic)
     parents_vector.append(vn2.getHash());
 
 
-    VersionNode vn3 = VersionNode(qb, parents_vector, gpolicy);
-    VersionNode vn4 = VersionNode(qb2, parents_vector, gpolicy);
+    VersionNode vn3 = VersionNode(qb2, parents_vector, gpolicy);
+    VersionNode vn4 = VersionNode(qb, parents_vector, gpolicy);
 
     parents_vector.clear();
     parents_vector.append(vn4.getHash());
@@ -76,18 +76,26 @@ TEST(VersionGraph, Basic)
     vg2.addNew(vn4);
     vg2.addNew(vn5);
     vg2.addNew(vn6);
-    vg2.addNew(vn7);
+    //vg2.addNew(vn7);
 
 
     vg2.save("GraphFile");
 
     VersionGraph vg = VersionGraph("GraphFile");
 
-    QHash<QByteArray, QByteArray> heads;
+    QVector<QByteArray> heads;
 
-    vg.getHeads(heads, vn4.getHash());
+    vg.getHeads(heads, vn.getHash());
+
+
+    Group       intersection(QVector<Id>(0),QVector<AsymmetricKey *>(0));
+    Group       symmetric_diff(QVector<Id>(0),QVector<AsymmetricKey *>(0));
+
+    vg.getHeadsIaSD(intersection, symmetric_diff, vn.getHash());
 
     std::cout << "Headcount : " << heads.count() << std::endl;
+    std::cout << "Intersecion Size : " << intersection.GetSize() << std::endl;
+    std::cout << "Symmetric Difference Size : " << symmetric_diff.GetSize() << std::endl;
 
     QByteArray w;
     QDataStream strm3(&w, QIODevice::WriteOnly);

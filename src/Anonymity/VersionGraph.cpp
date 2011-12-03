@@ -151,7 +151,7 @@ void VersionGraph::addNew(VersionNode &vn){
 }
 
 
-void VersionGraph::getHeads(QHash<QByteArray, QByteArray> &heads, QByteArray v_hash){
+void VersionGraph::getHeads(QVector<QByteArray> &heads, QByteArray v_hash){
     QList<QByteArray>       children_queue;
     QVector <QByteArray>    children_vector;
     QHash<QByteArray, bool> visited;
@@ -165,7 +165,7 @@ void VersionGraph::getHeads(QHash<QByteArray, QByteArray> &heads, QByteArray v_h
         children_vector = VersionGraph::getChildren(current_hash);
 
         if(children_vector.count() == 0){
-            heads.insert(current_hash, current_hash);
+            heads.append(current_hash);
         }
         else{
             for(int idx = 0; idx < children_vector.count(); idx++){
@@ -185,6 +185,61 @@ void VersionGraph::getHeads(QHash<QByteArray, QByteArray> &heads, QByteArray v_h
     }
 }
 
+void VersionGraph::getHeadsIaSD(Group &intersection,
+                                Group &symmetric_difference, QByteArray v_hash){
+    QVector<QByteArray> heads;
+    QHash<Id, int> counter_list;
+
+    QVector<Id>                 inter_group_ids(0);
+    QVector<Id>                 symdiff_group_ids(0);
+
+    QVector<AsymmetricKey *>    inter_group_keys(0);
+    QVector<AsymmetricKey *>    symdiff_group_keys(0);
+
+    VersionGraph::getHeads(heads, v_hash);
+
+    for(int idx = 0; idx < heads.count(); idx++){
+        VersionNode t_vn   = VersionGraph::getVersion(heads[idx]);
+        Group t_group(QVector<Id>(0));
+
+        t_vn.getGroup(t_group);
+
+        QVector<Id> t_ids  = t_group.GetIds();
+
+        for(int idx2 = 0; idx2 < t_ids.count(); idx2++){
+            if(counter_list.contains(t_ids[idx2])){
+                counter_list[t_ids[idx2]] += 1;
+            }
+            else{
+                counter_list[t_ids[idx2]] = 1;
+            }
+        }
+
+
+    }
+
+    std::cout << "List Count : " << counter_list.count() << std::endl;
+    QList<Id> hkeys = counter_list.uniqueKeys();
+
+
+    for(int idx = 0; idx < hkeys.count(); idx++){
+        Crypto::AsymmetricKey *key0 = new Crypto::CppPrivateKey();
+        if(counter_list[hkeys[idx]] == heads.count()){
+            inter_group_ids.append(hkeys[idx]);
+            inter_group_keys.append(key0->GetPublicKey());
+
+        }
+        else{
+            symdiff_group_ids.append(hkeys[idx]);
+            symdiff_group_keys.append(key0->GetPublicKey());
+        }
+        delete key0;
+    }
+    std::cout << "Matching Ids : " << inter_group_ids.count() << std::endl;
+
+    intersection            = Group(inter_group_ids, inter_group_keys);
+    symmetric_difference    = Group(symdiff_group_ids, symdiff_group_keys);
+}
 
 QDataStream &operator << (QDataStream &out, const VersionGraph graph)
 {
