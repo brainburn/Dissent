@@ -106,6 +106,7 @@ namespace Anonymity {
        */
       AsymmetricKey *GetKey(int idx) const;
 
+      QVector<AsymmetricKey *> GetKeys() const { return _data->Keys; };
       /**
        * Returns the size of the group
        */

@@ -189,6 +189,7 @@ void VersionGraph::getHeadsIaSD(Group &intersection,
                                 Group &symmetric_difference, QByteArray v_hash){
     QVector<QByteArray> heads;
     QHash<Id, int> counter_list;
+    QHash<Id, QByteArray> id_bkey_map;
 
     QVector<Id>                 inter_group_ids(0);
     QVector<Id>                 symdiff_group_ids(0);
@@ -207,6 +208,7 @@ void VersionGraph::getHeadsIaSD(Group &intersection,
         QVector<Id> t_ids  = t_group.GetIds();
 
         for(int idx2 = 0; idx2 < t_ids.count(); idx2++){
+            id_bkey_map[t_ids[idx2]] = t_group.GetKey(t_ids[idx2])->GetByteArray();
             if(counter_list.contains(t_ids[idx2])){
                 counter_list[t_ids[idx2]] += 1;
             }
@@ -218,23 +220,22 @@ void VersionGraph::getHeadsIaSD(Group &intersection,
 
     }
 
-    std::cout << "List Count : " << counter_list.count() << std::endl;
     QList<Id> hkeys = counter_list.uniqueKeys();
 
 
     for(int idx = 0; idx < hkeys.count(); idx++){
-        Crypto::AsymmetricKey *key0 = new Crypto::CppPrivateKey();
+        Crypto::AsymmetricKey *key0 = new Crypto::CppPublicKey(id_bkey_map[hkeys[idx]]);
         if(counter_list[hkeys[idx]] == heads.count()){
             inter_group_ids.append(hkeys[idx]);
-            inter_group_keys.append(key0->GetPublicKey());
+            inter_group_keys.append(key0);
 
         }
         else{
             symdiff_group_ids.append(hkeys[idx]);
-            symdiff_group_keys.append(key0->GetPublicKey());
+            symdiff_group_keys.append(key0);
         }
-        delete key0;
     }
+
     std::cout << "Matching Ids : " << inter_group_ids.count() << std::endl;
 
     intersection            = Group(inter_group_ids, inter_group_keys);

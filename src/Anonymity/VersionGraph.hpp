@@ -23,7 +23,6 @@ public:
     QByteArray                              CurrentVersion;
     QHash<QByteArray, VersionNode>          VersionDB;
     QHash<QByteArray, QVector<QByteArray> > ChildrenDB;
-
 };
 
 class VersionGraph
