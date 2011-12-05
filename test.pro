@@ -46,7 +46,7 @@ SOURCES += ext/googletest/src/gtest-all.cc \
 #           src/Tests/IdTest.cpp \
 #           src/Tests/ConnectionTest.cpp \
 #           src/Tests/SettingsTest.cpp \
-#          src/Tests/GroupTest.cpp \
+          src/Tests/GroupTest.cpp \
 #           src/Tests/NullRoundTest.cpp \
            src/Tests/Crypto.cpp \
 #           src/Tests/OnionTest.cpp \
@@ -55,6 +55,6 @@ SOURCES += ext/googletest/src/gtest-all.cc \
 #           src/Tests/RoundTest.cpp \
            src/Tests/TestNode.cpp \
           src/Tests/LogTest.cpp \
-#           src/Tests/ShuffleRoundTest.cpp
+#           src/Tests/ShuffleRoundTest.cpp \
     src/Tests/VersionNodeTest.cpp \
     src/Tests/VersionGraphTest.cpp

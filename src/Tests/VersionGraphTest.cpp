@@ -5,17 +5,21 @@ using namespace Dissent::Anonymity;
 
 namespace Dissent {
 namespace Tests {
-TEST(VersionGraph, Basic)
+TEST(VersionGraph, All)
 {
     DisableLogging();
 
     Id                          id[10];
+
+    // Group 1
     QVector<Id>                 group_vector;
     QVector<AsymmetricKey *>    key_vector;
 
+    // Group 2 - subset of Group 1
     QVector<Id>                 group_vector2;
     QVector<AsymmetricKey *>    key_vector2;
 
+    // Sample policy
     QMap<QString, QVariant>     gpolicy;
 
     gpolicy.insert("Quorum", 10);
@@ -33,6 +37,7 @@ TEST(VersionGraph, Basic)
 
     Group       group(group_vector,key_vector);
     Group       group2(group_vector2,key_vector2);
+
     QByteArray  qb;
     QDataStream strm(&qb, QIODevice::ReadWrite);
     QByteArray  qb2;
@@ -76,34 +81,75 @@ TEST(VersionGraph, Basic)
     vg2.addNew(vn4);
     vg2.addNew(vn5);
     vg2.addNew(vn6);
-    //vg2.addNew(vn7);
+
+    // getHeads tests start
+    QVector<QByteArray> heads;
+
+    vg2.getHeads(heads, vn.getHash());
+
+    EXPECT_EQ(heads.count(), 3);
+
+    heads.clear();
+
+    vg2.getHeads(heads, vn2.getHash());
+    EXPECT_EQ(heads.count(), 3);
+
+    heads.clear();
+
+    vg2.getHeads(heads, vn3.getHash());
+    EXPECT_EQ(heads.count(), 1);
+
+    heads.clear();
+
+    vg2.getHeads(heads, vn4.getHash());
+    EXPECT_EQ(heads.count(), 2);
+
+    heads.clear();
+
+    // getHeads tests end
 
     vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
                                   key_vector2[1]->GetByteArray());
-    std::cout << "Confirmations count: "
-              <<  vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
-                              key_vector2[0]->GetByteArray())
-              << std::endl;
+
+    EXPECT_EQ(vg2.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash())), 1);
+
+    EXPECT_EQ(vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                              key_vector2[0]->GetByteArray()), 2);
 
     vg2.save("GraphFile");
 
     VersionGraph vg = VersionGraph("GraphFile");
 
-    std::cout << "Confirmations count 2: "
-              << vg.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()))
-              << std::endl;
+    EXPECT_EQ(vg.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash())), 2);
 
-    vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
-                                  key_vector2[0]->GetByteArray());
+    EXPECT_EQ(vg.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                                  key_vector2[0]->GetByteArray()), 2);
 
-    std::cout << "Confirmations count 3: "
-              << vg2.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()))
-              << std::endl;
+    EXPECT_EQ(vg.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                                  key_vector2[2]->GetByteArray()), 3);
 
-    QVector<QByteArray> heads;
+    EXPECT_EQ(vg2.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash())), 2);
+
+
+    heads.clear();
 
     vg.getHeads(heads, vn.getHash());
 
+    EXPECT_EQ(heads.count(), 3);
+
+    vg.addNew(vn7);
+
+    heads.clear();
+
+    vg.getHeads(heads, vn.getHash());
+
+    EXPECT_EQ(heads.count(), 2);
+
+    heads.clear();
+
+    vg2.getHeads(heads, vn.getHash());
+
+    EXPECT_EQ(heads.count(), 3);
 
     Group       intersection(QVector<Id>(0),QVector<AsymmetricKey *>(0));
     Group       symmetric_diff(QVector<Id>(0),QVector<AsymmetricKey *>(0));
@@ -111,15 +157,9 @@ TEST(VersionGraph, Basic)
     vg.getHeadsIaSD(intersection, symmetric_diff, vn.getHash());
 
 
-    std::cout << "Headcount : " << heads.count() << std::endl;
-    std::cout << "Intersecion Size : " << intersection.GetSize() << std::endl;
-    std::cout << "Symmetric Difference Size : " << symmetric_diff.GetSize() << std::endl;
+    EXPECT_EQ(intersection.GetSize(), 3);
 
-    QByteArray w;
-    QDataStream strm3(&w, QIODevice::WriteOnly);
-    strm3 << vg;
-    QDataStream strm4(&w, QIODevice::ReadOnly);
-    strm4 >> vg;
+    EXPECT_EQ(symmetric_diff.GetSize(), 7);
 
     EnableLogging();
 }
