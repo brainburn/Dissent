@@ -97,7 +97,7 @@ TEST(VersionNode, Methods)
 
         qb += (idx);
         pv.append(qb);
-        temp_node = new VersionNode(qb, pv, QByteArray(), gpolicy);
+        temp_node = new VersionNode(qb, QByteArray(), pv, gpolicy);
 
         node_parents.append(temp_node);
     }

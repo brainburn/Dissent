@@ -25,7 +25,7 @@ TEST(VersionGraph, Basic)
       group_vector.append(id[idx]);
       key_vector.append(key0->GetPublicKey());
 
-      if(idx > 3){
+      if(idx < 3){
           group_vector2.append(id[idx]);
           key_vector2.append(key0->GetPublicKey());
       }
@@ -78,10 +78,27 @@ TEST(VersionGraph, Basic)
     vg2.addNew(vn6);
     //vg2.addNew(vn7);
 
+    vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                                  key_vector2[1]->GetByteArray());
+    std::cout << "Confirmations count: "
+              <<  vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                              key_vector2[0]->GetByteArray())
+              << std::endl;
 
     vg2.save("GraphFile");
 
     VersionGraph vg = VersionGraph("GraphFile");
+
+    std::cout << "Confirmations count 2: "
+              << vg.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()))
+              << std::endl;
+
+    vg2.confirm(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()),
+                                  key_vector2[0]->GetByteArray());
+
+    std::cout << "Confirmations count 3: "
+              << vg2.getConfirmCount(QPair<QByteArray,QByteArray>(vn3.getHash(), vn5.getHash()))
+              << std::endl;
 
     QVector<QByteArray> heads;
 
@@ -92,6 +109,7 @@ TEST(VersionGraph, Basic)
     Group       symmetric_diff(QVector<Id>(0),QVector<AsymmetricKey *>(0));
 
     vg.getHeadsIaSD(intersection, symmetric_diff, vn.getHash());
+
 
     std::cout << "Headcount : " << heads.count() << std::endl;
     std::cout << "Intersecion Size : " << intersection.GetSize() << std::endl;

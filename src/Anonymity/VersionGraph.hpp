@@ -13,34 +13,58 @@ class VersionGraphData : public QSharedData{
 public:
     VersionGraphData(const QByteArray current_version,
                      const QHash<QByteArray, VersionNode> version_db,
-                     const QHash<QByteArray, QVector<QByteArray> > children_db):
+                     const QHash<QByteArray, QVector<QByteArray> > children_db,
+                     const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > confirm_db):
         CurrentVersion(current_version),
         VersionDB(version_db),
-        ChildrenDB(children_db)
+        ChildrenDB(children_db),
+        ConfirmDB(confirm_db)
     {
     }
 
-    QByteArray                              CurrentVersion;
-    QHash<QByteArray, VersionNode>          VersionDB;
-    QHash<QByteArray, QVector<QByteArray> > ChildrenDB;
+    QByteArray                              CurrentVersion; // The hash of the current active version
+    QHash<QByteArray, VersionNode>          VersionDB;      // Nodes and edges towards parents
+    QHash<QByteArray, QVector<QByteArray> > ChildrenDB;     // Edges toward children
+    QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > ConfirmDB; // Versions confirms list
 };
 
 class VersionGraph
 {
 public:
+
+    /**
+     * Constructor - creates an instance of a graph, where every state is set to 0 or empty;
+     */
     VersionGraph();
 
+    /**
+     * Constructor - used for initialization
+     * @param _version from which the graph is to be initialized
+     */
     VersionGraph(const VersionNode &_version);
 
+    /**
+     * Constructor - used for loading a graph from a file
+     * @param filename of the file containing the graph data
+     */
     VersionGraph(const QString &filename);
 
+    /**
+     * Constructor - used mainly for deserialization
+     * @param _current_version the hash of the currently active version
+     * @param _version_db the version database
+     * @param _children_db the edges to the children nodes
+     * @param _confirm_db the versions confirmations list
+     */
     VersionGraph(const QByteArray &_current_version,
                  const QHash<QByteArray, VersionNode> &_version_db,
-                 const QHash<QByteArray, QVector<QByteArray> > &children_db);
+                 const QHash<QByteArray, QVector<QByteArray> > &_children_db,
+                 const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &_confirm_db);
 
 
     /**
      * Saves version graph to a file on disk
+     * @param filename under which the graph will be saved on disk
      */
     bool save(const QString &filename);
 
@@ -60,33 +84,56 @@ public:
     const  QHash<QByteArray, QVector<QByteArray> > &getCurrentChildrenDb() const;
 
     /**
+     * Returns the versions confirmations list database
+     */
+    const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &getConfirmDb() const;
+
+    /**
+     * Returns the number of confirms the edge in the graph has received
+     * @param edge connecting a from and to node
+     */
+    int getConfirmCount(const QPair<QByteArray, QByteArray> edge) const;
+
+    /**
+     *  Confirms the version on the to side of the edge({from, to} pair), by signign it with
+     *  the given public key. Returns the number of confirmations an edge has received
+     *  @param edge representing a {from, to} pair, where to is the hash of the version to be
+     *              confirmed
+     *  @param puk the public key of the member who wishes to confirm the edge
+     */
+    int confirm(const QPair<QByteArray, QByteArray> &edge, const QByteArray puk);
+
+    /**
      * Change the current active version
+     * @param vn the VersionNode, to the version hash of which we will set the current version
      */
     QByteArray setCurrentVersion(const VersionNode vn);
 
     /**
-     * Returns the version associated with the given hash key CONST ME!
+     * Returns the version associated with the given hash key
+     * @param version_hash the hash key of the version to be returned
      */
-    VersionNode& getVersion(QByteArray hash_key);
+    const VersionNode& getVersion(QByteArray version_hash);
 
     /**
      *  Returns a vector of versions that succeed the current one
+     *  @param version_hash the hash key of the version whose children we want to get
      */
-    QVector<QByteArray> getChildren(const QByteArray version_hash) const;
+    const QVector<QByteArray> getChildren(const QByteArray version_hash) const;
 
     /**
      *  Adds the given children to a node in the version graph
-     *  @param version vectors, whose hash keys will be added to the parent node
+     *  @param version_hash of the version to which we want to append children
+     *  @param children that we waht to append
      */
-    void addChildren(const QByteArray version_hash ,const QVector<VersionNode *> &children);
-
-    void addChildren(const QByteArray version_hash, QVector<QByteArray> const &children);
+    void addChildren(const QByteArray version_hash, const QVector<VersionNode *> &children);
 
     /**
-     *  Confirms the given version ??
-     *  @param vn VersionNode to be confirmed
+     *  Adds the given children to a node in the version graph
+     *  @param version_hash of the version to which we want to append children
+     *  @param children that we waht to append
      */
-    int confirm(VersionNode vn);
+    void addChildren(const QByteArray version_hash, QVector<QByteArray> const &children);
 
     /**
      *  Adds a new version as a child to the given parents
@@ -116,6 +163,8 @@ private:
 
     /**
      * Loads a version graph from a file on disk
+     * @param filename of the file to be loaded
+     * @param data where the data from the file is to be stored
      */
     bool initFromFile(const QString &filename, QByteArray &data);
 

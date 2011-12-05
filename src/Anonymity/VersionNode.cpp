@@ -25,7 +25,7 @@ namespace Anonymity {
 
       stream << _b_group_data;
       stream << QByteArray(0);
-      //stream << QMap<QString, QVariant>();
+      stream << QMap<QString, QVariant>();
 
       _data = new VersionNodeData(h.ComputeHash(_byte_buffer),
                                   QVector<QByteArray>(0),
@@ -52,9 +52,9 @@ VersionNode::VersionNode(const QByteArray _b_group_data,
 }
 
 VersionNode::VersionNode(const QByteArray _version_hash,
-            const QVector<QByteArray> _pkeys,
-            const QByteArray _b_group_data,
-            const QMap<QString, QVariant> _group_policy)
+                         const QByteArray _b_group_data,
+                         const QVector<QByteArray> _pkeys,
+                         const QMap<QString, QVariant> _group_policy)
 {
     _data = new VersionNodeData(_version_hash,
                                 _pkeys,
@@ -93,7 +93,11 @@ const QByteArray &VersionNode::getGroupByteArray() const
 QDataStream &operator << (QDataStream &out, const VersionNode node)
 {
 
-    out << node.getHash() << node.getParents() << node.getGroupByteArray() << node.getPolicy();
+    out << node.getHash()
+        << node.getParents()
+        << node.getGroupByteArray()
+        << node.getPolicy();
+
     return out;
 }
 
@@ -109,7 +113,7 @@ QDataStream &operator >> (QDataStream &in, VersionNode &node)
     in >> _b_group_data;
     in >> _group_policy;
 
-    node = VersionNode(_version_hash, _pkeys, _b_group_data, _group_policy);
+    node = VersionNode(_version_hash, _b_group_data, _pkeys, _group_policy);
 
 
     return in;
