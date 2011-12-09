@@ -3,6 +3,11 @@
 
 #include "VersionNode.hpp"
 
+#define FROM_NODE   QByteArray // Edge start node
+#define TO_NODE     QByteArray // Edge end node
+#define PUK         QByteArray // Public Key
+#define NODE_ID     QByteArray // Cryptographic version node hash
+
 namespace Dissent{
 namespace Anonymity{
 
@@ -11,10 +16,10 @@ namespace Anonymity{
  */
 class VersionGraphData : public QSharedData{
 public:
-    VersionGraphData(const QByteArray current_version,
-                     const QHash<QByteArray, VersionNode> version_db,
-                     const QHash<QByteArray, QVector<QByteArray> > children_db,
-                     const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > confirm_db):
+    VersionGraphData(const NODE_ID current_version,
+                     const QHash<NODE_ID, VersionNode> version_db,
+                     const QHash<NODE_ID, QVector<NODE_ID> > children_db,
+                     const QHash<QPair<FROM_NODE, TO_NODE>, QList <PUK > > confirm_db):
         CurrentVersion(current_version),
         VersionDB(version_db),
         ChildrenDB(children_db),
@@ -22,10 +27,10 @@ public:
     {
     }
 
-    QByteArray                              CurrentVersion; // The hash of the current active version
-    QHash<QByteArray, VersionNode>          VersionDB;      // Nodes and edges towards parents
-    QHash<QByteArray, QVector<QByteArray> > ChildrenDB;     // Edges toward children
-    QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > ConfirmDB; // Versions confirms list
+    NODE_ID                              CurrentVersion; // The hash of the current active version
+    QHash<NODE_ID, VersionNode>          VersionDB;      // Nodes and edges towards parents
+    QHash<NODE_ID, QVector<NODE_ID> >    ChildrenDB;     // Edges toward children
+    QHash<QPair<FROM_NODE, TO_NODE>, QList <PUK > > ConfirmDB; // Versions confirms list
 };
 
 class VersionGraph
@@ -57,9 +62,9 @@ public:
      * @param _confirm_db the versions confirmations list
      */
     VersionGraph(const QByteArray &_current_version,
-                 const QHash<QByteArray, VersionNode> &_version_db,
-                 const QHash<QByteArray, QVector<QByteArray> > &_children_db,
-                 const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &_confirm_db);
+                 const QHash<NODE_ID, VersionNode> &_version_db,
+                 const QHash<NODE_ID, QVector<NODE_ID> > &_children_db,
+                 const QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > > &_confirm_db);
 
 
     /**
@@ -76,23 +81,23 @@ public:
     /**
      * Returns the version nodes database
      */
-    const QHash<QByteArray, VersionNode> &getCurrentVersionDb() const;
+    const QHash<NODE_ID, VersionNode> &getCurrentVersionDb() const;
 
     /**
      * Returns the chilren edges database
      */
-    const  QHash<QByteArray, QVector<QByteArray> > &getCurrentChildrenDb() const;
+    const  QHash<NODE_ID, QVector<NODE_ID> > &getCurrentChildrenDb() const;
 
     /**
      * Returns the versions confirmations list database
      */
-    const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &getConfirmDb() const;
+    const QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > > &getConfirmDb() const;
 
     /**
      * Returns the number of confirms the edge in the graph has received
      * @param edge connecting a from and to node
      */
-    int getConfirmCount(const QPair<QByteArray, QByteArray> edge) const;
+    int getConfirmCount(const QPair<FROM_NODE, TO_NODE> edge) const;
 
     /**
      *  Confirms the version on the to side of the edge({from, to} pair), by signign it with
@@ -101,7 +106,7 @@ public:
      *              confirmed
      *  @param puk the public key of the member who wishes to confirm the edge
      */
-    int confirm(const QPair<QByteArray, QByteArray> &edge, const QByteArray puk);
+    int confirm(const QPair<FROM_NODE, TO_NODE> &edge, const PUK puk);
 
     /**
      * Change the current active version
@@ -113,27 +118,27 @@ public:
      * Returns the version associated with the given hash key
      * @param version_hash the hash key of the version to be returned
      */
-    const VersionNode& getVersion(QByteArray version_hash);
+    const VersionNode& getVersion(NODE_ID version_hash);
 
     /**
      *  Returns a vector of versions that succeed the current one
      *  @param version_hash the hash key of the version whose children we want to get
      */
-    const QVector<QByteArray> getChildren(const QByteArray version_hash) const;
+    const QVector<QByteArray> getChildren(const NODE_ID version_hash) const;
 
     /**
      *  Adds the given children to a node in the version graph
      *  @param version_hash of the version to which we want to append children
      *  @param children that we waht to append
      */
-    void addChildren(const QByteArray version_hash, const QVector<VersionNode *> &children);
+    void addChildren(const NODE_ID version_hash, const QVector<VersionNode *> &children);
 
     /**
      *  Adds the given children to a node in the version graph
      *  @param version_hash of the version to which we want to append children
      *  @param children that we waht to append
      */
-    void addChildren(const QByteArray version_hash, QVector<QByteArray> const &children);
+    void addChildren(const NODE_ID version_hash, QVector<QByteArray> const &children);
 
     /**
      *  Adds a new version as a child to the given parents
@@ -146,7 +151,7 @@ public:
      *  @param the heads descending from version v_hash
      *  @param v_hash the version, the heads descending from which we are looking for
      */
-    void getHeads(QVector<QByteArray> &heads,QByteArray v_hash);
+    void getHeads(QVector<NODE_ID> &heads, NODE_ID v_hash);
 
     /**
      *  Sets intersection to the intersection and symmetric_difference the symmetric difference
@@ -155,7 +160,7 @@ public:
      *  @param intersection the intersection of the graph heads
      *  @param symmetric_difference the symmetric difference of the graph heads
      */
-    void getHeadsIaSD(Group &intersection, Group &symmetric_difference, QByteArray v_hash);
+    void getHeadsIaSD(Group &intersection, Group &symmetric_difference, NODE_ID v_hash);
 
     static VersionNode Zero;
 

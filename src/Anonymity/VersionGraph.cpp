@@ -7,16 +7,16 @@ namespace Anonymity {
 VersionGraph::VersionGraph()
 {
     _data = new VersionGraphData(QByteArray(0),
-                                 QHash<QByteArray, VersionNode>(),
-                                 QHash<QByteArray, QVector<QByteArray> >(),
-                                 QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > >());
+                                 QHash<NODE_ID, VersionNode>(),
+                                 QHash<NODE_ID, QVector<NODE_ID> >(),
+                                 QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > >());
 }
 
 
 VersionGraph::VersionGraph(const VersionNode & _version)
 {
-    QHash<QByteArray, VersionNode>          qh;
-    QHash<QByteArray, QVector<QByteArray> > ch;
+    QHash<NODE_ID, VersionNode>     qh;
+    QHash<NODE_ID, QVector<NODE_ID> > ch;
 
     ch[_version.getHash()] = QVector<QByteArray>();
     qh[_version.getHash()] = _version;
@@ -24,16 +24,16 @@ VersionGraph::VersionGraph(const VersionNode & _version)
     _data = new VersionGraphData(_version.getHash(),
                                  qh,
                                  ch,
-                                 QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > >());
+                                 QHash<QPair<FROM_NODE, TO_NODE>, QList <NODE_ID > >());
 }
 
 VersionGraph::VersionGraph(const QString &filename)
 {
-    QByteArray                              data;
-    QDataStream                             stream (&data, QIODevice::ReadOnly);
-    QHash<QByteArray, VersionNode>          qh;
-    QHash<QByteArray, QVector<QByteArray> > ch;
-    QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > conh;
+    QByteArray                      data;
+    QDataStream                     stream (&data, QIODevice::ReadOnly);
+    QHash<NODE_ID, VersionNode>     qh;
+    QHash<NODE_ID, QVector<NODE_ID> > ch;
+    QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > > conh;
     QByteArray current_version;
 
     if(!initFromFile(filename, data))
@@ -54,10 +54,10 @@ VersionGraph::VersionGraph(const QString &filename)
 }
 
 
-VersionGraph::VersionGraph(const QByteArray                              &_current_version,
-                           const QHash<QByteArray, VersionNode>          &_version_db,
-                           const QHash<QByteArray, QVector<QByteArray> > &_children_db,
-                           const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &_confirm_db)
+VersionGraph::VersionGraph(const NODE_ID                           &_current_version,
+                           const QHash<NODE_ID, VersionNode>       &_version_db,
+                           const QHash<NODE_ID, QVector<NODE_ID> > &_children_db,
+                           const QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > > &_confirm_db)
 {
     _data = new VersionGraphData(_current_version,
                                  _version_db,
@@ -96,22 +96,22 @@ bool VersionGraph::save(const QString &filename)
     return true;
 }
 
-const QHash<QByteArray, VersionNode> &VersionGraph::getCurrentVersionDb() const
+const QHash<NODE_ID, VersionNode> &VersionGraph::getCurrentVersionDb() const
 {
     return _data->VersionDB;
 }
 
-const  QHash<QByteArray, QVector<QByteArray> > &VersionGraph::getCurrentChildrenDb() const
+const  QHash<NODE_ID, QVector<NODE_ID> > &VersionGraph::getCurrentChildrenDb() const
 {
     return _data->ChildrenDB;
 }
 
-const QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > &VersionGraph::getConfirmDb() const
+const QHash<QPair<FROM_NODE, TO_NODE>, QList <QByteArray > > &VersionGraph::getConfirmDb() const
 {
     return _data->ConfirmDB;
 }
 
-int VersionGraph::getConfirmCount(const QPair<QByteArray, QByteArray> edge) const
+int VersionGraph::getConfirmCount(const QPair<FROM_NODE, TO_NODE> edge) const
 {
     if(_data->ConfirmDB.contains(edge)){
         return _data->ConfirmDB[edge].count();
@@ -121,9 +121,9 @@ int VersionGraph::getConfirmCount(const QPair<QByteArray, QByteArray> edge) cons
     }
 }
 
-int VersionGraph::confirm(const QPair<QByteArray, QByteArray> &edge, const QByteArray puk)
+int VersionGraph::confirm(const QPair<FROM_NODE, TO_NODE> &edge, const QByteArray puk)
 {
-    QVector<QByteArray>         from_keys;                  // The keys of the members of the parent group
+    QVector<NODE_ID>            from_keys;                  // The keys of the members of the parent group
     QVector<AsymmetricKey *>    from_keys_pts;              // Pointers from which we will get the keys
     Group                       from_group(QVector<Id>(0)); // The parent group
 
@@ -154,7 +154,7 @@ const QByteArray &VersionGraph::getCurrentVersion() const
     return _data->CurrentVersion;
 }
 
-const VersionNode &VersionGraph::getVersion(QByteArray hash_key)
+const VersionNode &VersionGraph::getVersion(NODE_ID hash_key)
 {
     if(!_data->VersionDB.contains(hash_key)){
         return VersionGraph::Zero;
@@ -169,12 +169,12 @@ QByteArray VersionGraph::setCurrentVersion(const VersionNode vn)
     return this->getCurrentVersion();
 }
 
-const QVector<QByteArray> VersionGraph::getChildren(const QByteArray version_hash) const
+const QVector<QByteArray> VersionGraph::getChildren(const NODE_ID version_hash) const
 {
     return _data->ChildrenDB[version_hash];
 }
 
-void VersionGraph::addChildren(const QByteArray version_hash,
+void VersionGraph::addChildren(const NODE_ID version_hash,
                                const QVector<VersionNode *> &children)
 {
     for(int idx = 0; idx < children.size(); idx++){
@@ -182,30 +182,32 @@ void VersionGraph::addChildren(const QByteArray version_hash,
     }
 }
 
-void VersionGraph::addChildren(const QByteArray version_hash,QVector<QByteArray> const &children)
+void VersionGraph::addChildren(const NODE_ID version_hash,QVector<QByteArray> const &children)
 {
     _data->ChildrenDB[version_hash] += children;
 }
 
 void VersionGraph::addNew(VersionNode &vn){
     QVector<VersionNode *>  new_child;
-    QVector<QByteArray>     parents = vn.getParents();
+    QVector<NODE_ID>     parents = vn.getParents();
 
-    new_child += &vn;
+    if(!_data->VersionDB.contains(vn.getHash())){
+        new_child += &vn;
 
-    _data->VersionDB.insert(vn.getHash(), vn);
+        _data->VersionDB.insert(vn.getHash(), vn);
 
-    for(int idx = 0; idx < parents.size(); idx++){
-        VersionGraph::addChildren(parents[idx], new_child);
+        for(int idx = 0; idx < parents.size(); idx++){
+            VersionGraph::addChildren(parents[idx], new_child);
+        }
     }
 }
 
 
-void VersionGraph::getHeads(QVector<QByteArray> &heads, QByteArray v_hash){
-    QList<QByteArray>       children_queue; // The queue to be explored
-    QVector <QByteArray>    children_vector;// The children of the node being explored
-    QHash<QByteArray, bool> visited;
-    QByteArray current_hash;
+void VersionGraph::getHeads(QVector<NODE_ID> &heads, NODE_ID v_hash){
+    QList<NODE_ID>       children_queue; // The queue to be explored
+    QVector <NODE_ID>    children_vector;// The children of the node being explored
+    QHash<NODE_ID, bool> visited;
+    NODE_ID current_hash;
 
     children_queue.push_back(v_hash);
 
@@ -242,7 +244,7 @@ void VersionGraph::getHeads(QVector<QByteArray> &heads, QByteArray v_hash){
 void VersionGraph::getHeadsIaSD(Group &intersection,
                                 Group &symmetric_difference, QByteArray v_hash){
 
-    QVector<QByteArray>     heads;
+    QVector<NODE_ID>     heads;
     QHash<Id, int>          counter_list;   // Count in how many groups a user id appears
     QHash<Id, QByteArray>   id_bkey_map;    // Map from user Id to their kep
 
@@ -309,10 +311,10 @@ QDataStream &operator << (QDataStream &out, const VersionGraph graph)
 
 QDataStream &operator >> (QDataStream &in, VersionGraph &graph)
 {
-    QByteArray _hash_key;
-    QHash<QByteArray, VersionNode> _vdb;
-    QHash<QByteArray, QVector<QByteArray> > _cdb;
-    QHash<QPair<QByteArray, QByteArray>, QList <QByteArray > > _condb;
+    NODE_ID _hash_key;
+    QHash<NODE_ID, VersionNode> _vdb;
+    QHash<NODE_ID, QVector<NODE_ID> > _cdb;
+    QHash<QPair<FROM_NODE, TO_NODE>, QList <NODE_ID > > _condb;
 
     in >> _hash_key;
     in >> _vdb;
